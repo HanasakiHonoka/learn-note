@@ -414,5 +414,5 @@ postMessage 是 HTML5 新增加的一项功能，跨文档消息传输(Cross Doc
 
 7. **document.domin**
 
-对于主域相同而子域不同的情况下，可以通过设置 document.domain 的办法来解决，具体做法是可以在 [http://www.example.com/a.html](https://link.zhihu.com/?target=http%3A//www.example.com/a.html) 和 [http://sub.example.com/b.html](https://link.zhihu.com/?target=http%3A//sub.example.com/b.html) 两个文件分别加上 document.domain = "a.com"；然后通过 a.html 文件创建一个 iframe，去控制 iframe 的 window，从而进行交互，当然这种方法只能解决主域相同而二级域名不同的情况，如果你异想天开的把 script.example.com 的 domain 设为 qq.com 显然是没用的。
+对于主域相同而子域不同的情况下，可以通过设置 document.domain 的办法来解决，具体做法是可以在 [http://www.example.com/a.html](https://link.zhihu.com/?target=http%3A//www.example.com/a.html) 和 [http://sub.example.com/b.html](https://link.zhihu.com/?target=http%3A//sub.example.com/b.html) 两个文件分别加上 document.domain = "example.com"；然后通过 a.html 文件创建一个 iframe，去控制 iframe 的 window，从而进行交互，当然这种方法只能解决主域相同而二级域名不同的情况，如果你异想天开的把 script.example.com 的 domain 设为 qq.com 显然是没用的。
 
