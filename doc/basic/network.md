@@ -4,7 +4,7 @@
 
 学习计算机网络时我们一般采用折中的办法，也就是中和 OSI 和 TCP/IP 的优点，采用一种只有五层协议的体系结构，这样既简洁又能将概念阐述清楚。
 
-![五层体系结构](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019/7/五层体系结构.png)
+[![gYJylR.png](https://z3.ax1x.com/2021/05/09/gYJylR.png)](https://imgtu.com/i/gYJylR)
 
 结合互联网的情况，自上而下地，非常简要的介绍一下各层的作用。
 
