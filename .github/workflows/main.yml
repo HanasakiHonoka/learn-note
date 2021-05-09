@@ -16,3 +16,10 @@ jobs:
           local_path: './doc/*'
           remote_path: '/home/doc'
           args: '-o ConnectTimeout=5'
+      - name: nginx reload
+        uses: Boberneprotiv/ssh-remove-run@v1
+        with:
+          user: 'root'
+          host: '106.54.68.249'
+          private-key-path: ${{ secrets.SSH_PRIVATE_KEY }} 
+          run: '/usr/local/nginx/sbin/nginx -s reload'
