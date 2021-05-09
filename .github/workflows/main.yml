@@ -17,9 +17,18 @@ jobs:
           remote_path: '/home/doc'
           args: '-o ConnectTimeout=5'
       - name: nginx reload
-        uses: Boberneprotiv/ssh-remove-run@v1
+        uses: HyrenDev/remote-action@0.1-ALPHA
         with:
-          user: 'root'
-          host: '106.54.68.249'
-          private-key-path: ${{ secrets.SSH_PRIVATE_KEY }} 
-          run: '/usr/local/nginx/sbin/nginx -s reload'
+          commands: |
+            [
+              "/usr/local/nginx/sbin/nginx -s reload"
+            ]
+          servers: |
+            [
+              {
+                "host": "106.54.68.249",
+                "port": 22,
+                "user": "root",
+                "private_key": ${{ secrets.SSH_PRIVATE_KEY_64 }} 
+              }
+            ]
