@@ -59,13 +59,13 @@
 
 上面我们对计算机网络的五层体系结构有了初步的了解，下面附送一张七层体系结构图总结一下（图片来源于网络）。
 
-![七层体系结构图](images/七层体系结构图.png)
+[![gY1Hde.gif](https://z3.ax1x.com/2021/05/09/gY1Hde.gif)](https://imgtu.com/i/gY1Hde)
 
 ## 二 TCP 三次握手和四次挥手(面试常客)
 
 ### 图解
 
-![](https://img-blog.csdn.net/20180717202520531?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4OTUwMzE2/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+[![gY3PoQ.png](https://z3.ax1x.com/2021/05/09/gY3PoQ.png)](https://imgtu.com/i/gY3PoQ)
 
 第一次握手：建立连接时，客户端发送syn包（syn=x）到服务器，并进入SYN_SENT状态，等待服务器确认；SYN：同步序列编号（Synchronize Sequence Numbers）。
 
@@ -73,7 +73,7 @@
 
 第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack=y+1），此包发送完毕，客户端和服务器进入ESTABLISHED（TCP连接成功）状态，完成三次握手。
 
-![](https://img-blog.csdn.net/20180717204202563?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4OTUwMzE2/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+[![gY3eyV.png](https://z3.ax1x.com/2021/05/09/gY3eyV.png)](https://imgtu.com/i/gY3eyV)
 
 1）客户端进程发出连接释放报文，并且停止发送数据。释放数据报文首部，FIN=1，其序列号为seq=u（等于前面已经传送过来的数据的最后一个字节的序号加1），此时，客户端进入FIN-WAIT-1（终止等待1）状态。 TCP规定，FIN报文段即使不携带数据，也要消耗一个序号。
 
