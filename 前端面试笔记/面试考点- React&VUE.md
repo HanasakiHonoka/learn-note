@@ -154,5 +154,5 @@ React发现这样操作非常繁琐冗余，因为这些集合里含有相同的
 
 允许开发者对同一层级的同组子节点，添加唯一key进行区分，虽然只是小小的改动，但性能上却发生了翻天覆地的变化。
 
-![img](https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8xNDUxMjM3MC03YzUxMjEyZjBhNDdkZmNjLlBORw?x-oss-process=image/format,png)
+![](https://www.hualigs.cn/image/6098cc90c6c3f.jpg)
 

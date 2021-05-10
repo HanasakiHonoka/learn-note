@@ -58,7 +58,7 @@ HTTP劫持现象：访问着github的页面，右下角出现了一个格格不�
 
 #### DNS劫持的方法
 
-![img](http://user-gold-cdn.xitu.io/2019/6/11/16b464983affd008?imageView2)
+![](https://www.hualigs.cn/image/6098c9f102c7a.jpg)s
 
 **1.本机DNS劫持**
 

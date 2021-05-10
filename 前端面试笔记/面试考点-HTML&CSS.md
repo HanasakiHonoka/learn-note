@@ -108,7 +108,7 @@ item3的最终宽度为：180 - 50 * 180 * 1 / 870 ≈ 169px
 
 #### 1. 固定宽高垂直居中
 
-![](https://www.haorooms.com/uploads/images/fix_centered.gif)
+![](https://www.hualigs.cn/image/6098cc0dbad19.jpg)
 
 ```css
 position: absolute;
