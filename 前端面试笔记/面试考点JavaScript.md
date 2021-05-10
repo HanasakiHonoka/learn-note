@@ -73,7 +73,7 @@ function add1(x, y, z) {
 const add = curry(add1);
 ```
 
-### 手写Promise.all()（ 加个参数负责最大并发量（未完成））
+### 手写Promise.all()
 
 1. Promise.myAll()返回的肯定是一个promise对象，所以可以直接写一个return new Promise((resolve, reject) => {})(这应该是一个惯性思维)
 
@@ -102,6 +102,31 @@ Promise.all = function (iterator) {
             .catch(e => {
                 reject(e)
             })
+        }
+    })
+}
+//加最大并发量版本
+Promise.all = function (iterator, maxNum) {  
+    let len = iterator.length
+    let res = []//用于存放结果
+    let max = Math.min(len, maxNum); // 最大并发量
+    return new Promise((resolve,reject) => {
+        function run(p) {
+            Promise.resolve(p)
+            .then(data => {
+                res.push(data);
+                if(iterator.length > 0) {
+                    run(iterator.shift());
+                } else if(res.length === len) {
+                    resolve(res);
+                }
+            })
+            .catch(e => {
+                reject(e);
+            })
+        }
+        for(let i = 0; i < max; i++){
+            run(iterator.shift());
         }
     })
 }
@@ -169,7 +194,7 @@ function throttle2(fn,time) {
 
 ### 原型链图
 
-![img](https://img2018.cnblogs.com/blog/939316/201809/939316-20180927095306645-1975780154.png)
+[![gts1PI.png](https://z3.ax1x.com/2021/05/10/gts1PI.png)](https://imgtu.com/i/gts1PI)
 
 ### 手写ajax
 
@@ -486,7 +511,7 @@ function unique (arr) {
 
 ### JS显示转换与隐式转换
 
-![](https://upload-images.jianshu.io/upload_images/14976946-fc8e665ea1f5f0ca.png)
+![](https://www.hualigs.cn/image/6098c3fce0974.jpg)
 
 #### **显示转换**
 
@@ -504,7 +529,7 @@ function unique (arr) {
 
 2.**转换成数值**
 
-![img](https://upload-images.jianshu.io/upload_images/14976946-9661cd8b3a7dd4e5.png)
+![](https://www.hualigs.cn/image/6098c42dcd874.jpg)
 
 注意：
 
@@ -549,7 +574,7 @@ undefined==null  //true
 
 3.复杂类型在进行隐式转换时，会先转成String，再转换成Number类型进行比较
 
-![img](https://upload-images.jianshu.io/upload_images/14976946-0e711e0b04ae3f7a.png)
+![](https://www.hualigs.cn/image/6098c45f2d3fd.jpg)
 
 ```bash
 [1,2]=='1,2' //true [1,2].valueOf()=>[1,2] [1,2].toString()=>'1,2'
