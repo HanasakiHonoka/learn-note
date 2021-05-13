@@ -22,7 +22,7 @@
 * 视图解析器 ViewResolver：进行视图的解析，根据视图逻辑名将ModelAndView解析成真正的视图（view）
 * 视图View：View是一个接口， 它的实现类支持不同的视图类型，如jsp，freemarker，pdf等等
 
-# Springmvc的优点:
+# SpringMVC的优点:
 
 （1）可以支持各种视图技术，而不仅仅局限于JSP；
 
