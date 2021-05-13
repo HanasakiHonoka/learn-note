@@ -32,3 +32,10 @@ jobs:
                 "private_key": ${{ secrets.SSH_PRIVATE_KEY_64 }} 
               }
             ]
+      - name: 'Send Message to Wechat'
+        uses: HollowMan6/Wechat-Timed-Message@main
+        with:
+          PPTOKEN: ${{ secrets.PPTOKEN }}
+          PPTOPIC: ${{ secrets.PPTOPIC }}
+          TITLE: ${{ github.event.commits[0].author.name }}更新了
+          MSG: ${{ github.event.commits[0].message }}
