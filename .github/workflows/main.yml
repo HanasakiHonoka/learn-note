@@ -37,5 +37,5 @@ jobs:
         with:
           PPTOKEN: ${{ secrets.PPTOKEN }}
           PPTOPIC: ${{ secrets.PPTOPIC }}
-          TITLE: ${{ github.event.commits[0].author.name }}更新了
+          TITLE: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
           MSG: ${{ github.event.commits[0].message }}
