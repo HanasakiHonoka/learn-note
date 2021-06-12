@@ -23,7 +23,7 @@
   * [面试考点-HTTP](frontend/面试考点-HTTP)
   * [面试考点-JavaScript](frontend/面试考点-JavaScript)
 * [**前端**](frontend2/)
-  * [前端笔记](frontend/笔记)
+  * [前端笔记](frontend2/笔记)
 * [**LeetCode**](leetcode/)
   * [Hot100总结](leetcode/Hot100总结.md)
   * [常用模板](leetcode/template.md)
