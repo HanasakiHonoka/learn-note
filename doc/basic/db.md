@@ -9,7 +9,7 @@
 mysql> show engines;
 ```
 
-![查看MySQL提供的所有存储引擎](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/mysql-engines.png)
+[![fKhAO0.png](https://z3.ax1x.com/2021/08/07/fKhAO0.png)](https://imgtu.com/i/fKhAO0)
 
 从上图我们可以查看出 MySQL 当前默认的存储引擎是InnoDB,并且在5.7版本所有的存储引擎中只有 InnoDB 是事务性存储引擎，也就是说只有 InnoDB 支持事务。
 
@@ -27,7 +27,7 @@ mysql> show variables like '%storage_engine%';
 show table status like "table_name" ;
 ```
 
-![查看表的存储引擎](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/查看表的存储引擎.png)
+[![fKhZwT.png](https://z3.ax1x.com/2021/08/07/fKhZwT.png)](https://imgtu.com/i/fKhZwT)
 
 ## MyISAM和InnoDB区别
 
@@ -247,7 +247,7 @@ select sql_no_cache count(*) from usr;
 
 ### 事务的四大特性(ACID)
 
-![事务的特性](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/事务特性.png)
+[![fKhQp9.png](https://z3.ax1x.com/2021/08/07/fKhQp9.png)](https://imgtu.com/i/fKhQp9)
 
 1. **原子性（Atomicity）：** 事务是最小的执行单位，不允许分割。事务的原子性确保动作要么全部完成，要么完全不起作用；
 2. **一致性（Consistency）：** 执行事务后，数据库从一个正确的状态变化到另一个正确的状态；

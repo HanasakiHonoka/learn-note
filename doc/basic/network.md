@@ -253,7 +253,7 @@ ARP协议是“Address Resolution Protocol”（地址解析协议）的缩写�
 
 ## HTTP状态码
 
-![状态码](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019/7/状态码.png)
+[![fKf6JJ.png](https://z3.ax1x.com/2021/08/07/fKf6JJ.png)](https://imgtu.com/i/fKf6JJ)
 
 * 200 OK：客户端请求成功。
 * 400 Bad Request：客户端请求有语法错误，不能被服务器所理解。
@@ -269,7 +269,7 @@ ARP协议是“Address Resolution Protocol”（地址解析协议）的缩写�
 
 图片来源：《图解HTTP》
 
-![各种协议与HTTP协议之间的关系](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019/7/各种协议与HTTP协议之间的关系.png)
+[![fKfcW9.png](https://z3.ax1x.com/2021/08/07/fKfcW9.png)](https://imgtu.com/i/fKfcW9)
 
 
 ## 八  HTTP长连接,短连接
@@ -296,7 +296,6 @@ HTTP 是一种不保存状态，即无状态（stateless）协议。也就是说
 
 最常用的就是利用 URL 重写把 Session ID 直接附加在URL路径的后面。
 
-![HTTP是无状态协议](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/HTTP是无状态的.png)
 
 ## 十 Cookie的作用是什么?和Session有什么区别？
 
