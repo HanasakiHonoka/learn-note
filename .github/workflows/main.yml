@@ -17,21 +17,13 @@ jobs:
           remote_path: '/home/doc'
           args: '-o ConnectTimeout=5'
       - name: nginx reload
-        uses: HyrenDev/remote-action@0.1-ALPHA
+        uses: appleboy/ssh-action@master
         with:
-          commands: |
-            [
-              "/usr/local/nginx/sbin/nginx -s reload"
-            ]
-          servers: |
-            [
-              {
-                "host": "106.54.68.249",
-                "port": 22,
-                "user": "root",
-                "private_key": ${{ secrets.SSH_PRIVATE_KEY_64 }} 
-              }
-            ]
+          host: "106.54.68.249"
+          username: "root"
+          password: ${{ secrets.PASSWORD }}
+          port: 22
+          script: "/usr/local/nginx/sbin/nginx -s reload"
       - name: 'Send Message to Wechat'
         uses: HollowMan6/Wechat-Timed-Message@main
         with:
