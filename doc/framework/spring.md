@@ -19,7 +19,7 @@ Spring 官网列出的 Spring 的 6 个特征:
 
 下图对应的是 Spring4.x 版本。目前最新的5.x版本中 Web 模块的 Portlet 组件已经被废弃掉，同时增加了用于异步响应式处理的 WebFlux 组件。
 
-![Spring主要模块](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/Spring主要模块.png)
+[![flVtUI.png](https://z3.ax1x.com/2021/08/08/flVtUI.png)](https://imgtu.com/i/flVtUI)
 
 - **Spring Core：** 基础,可以说 Spring 其他所有的功能都需要依赖于该类库。主要提供 IoC 依赖注入功能。
 - **Spring Aspects** ： 该模块为与AspectJ的集成提供支持。

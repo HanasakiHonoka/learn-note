@@ -13,7 +13,7 @@
 * （10）DispatcherServlet对View进行渲染视图（即将模型数据填充至视图中）
 * （11）DispatcherServlet响应用户。
 
-![](https://img-blog.csdn.net/20180708224853769?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2E3NDUyMzM3MDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+[![flVN5t.png](https://z3.ax1x.com/2021/08/08/flVN5t.png)](https://imgtu.com/i/flVN5t)
 
 * 前端控制器 DispatcherServlet：接收请求、响应结果，相当于转发器，有了DispatcherServlet 就减少了其它组件之间的耦合度。
 * 处理器映射器 HandlerMapping：根据请求的URL来查找Handler
