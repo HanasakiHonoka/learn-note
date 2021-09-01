@@ -1,4 +1,4 @@
-### Vue和React的区别
+## Vue和React的区别
 
 1. **模版vsJSX**
 
@@ -83,6 +83,36 @@ obj = new Proxy(obj, {
   })
 ```
 
+##### Object.defineP roperty和Proxy的区别
+
+- Object.defineProperty对对象自身做修改, 而Proxy只是在Object基础上加一层拦截，不修改原对象
+- 监听不了数组的变化
+- 监听手段比较单一，只能监听set和get, Proxy有10几种监听
+- 必须得把所有的属性全部添加defineProperty, Proxy对整个对象都会进行拦截
+- Proxy是代理在`对象`级别的，defineProperty是代理到`静态的值`级别，所以Proxy的强大就在这里
+
+#### Proxy监听数组访问
+
+```js
+var arr = [1,2,3,4];
+let arrProxy = new Proxy(arr, {
+    get(target, propKey) {
+        if (Array.isArray(target) && typeof Array.prototype[propKey] === 'function') {
+            Promise.resolve().then(e => {
+                console.log('操作了数组', propKey);
+            })
+        }
+        return target[propKey]
+    }
+})
+arrProxy.push(5);
+console.log('push结束了');
+// push结束了
+// 操作了数组 push
+```
+
+
+
 ## React
 
 ### React的生命周期
@@ -117,6 +147,8 @@ obj = new Proxy(obj, {
  当新一项被加进去这个JavaScript对象时，一个函数会计算新旧Virtual DOM之间的差异并反应在真实的DOM上。计**算差异的算法是高性能框架的秘密所在**，React和Vue在实现上有点不同。 Vue宣称可以更快地计算出Virtual DOM的差异，这是由于它在渲染过程中，会**跟踪每一个组件的依赖关系**，**不需要**重新渲染整个组件树。 而对于React而言，每当应用的状态被改变时，**全部子组件都会重新渲染**。当然，这可以通过shouldComponentUpdate这个生命周期方法来进行控制，但Vue将此视为默认的优化。 小结：如果你的应用中，交互复杂，需要处理大量的UI变化，那么使用Virtual DOM是一个好主意。如果你更新元素并不频繁，那么Virtual DOM并不一定适用，性能很可能还不如直接操控DOM。
 
 ### diff策略
+
+![](https://www.hualigs.cn/image/6098cc90c6c3f.jpg)
 
 #### **tree diff**
 
@@ -154,5 +186,75 @@ React发现这样操作非常繁琐冗余，因为这些集合里含有相同的
 
 允许开发者对同一层级的同组子节点，添加唯一key进行区分，虽然只是小小的改动，但性能上却发生了翻天覆地的变化。
 
-![](https://www.hualigs.cn/image/6098cc90c6c3f.jpg)
+## jquery ajax, Axios, Fetch区别
+
+### jQuery ajax
+
+```js
+$.ajax({
+   type: 'POST',
+   url: url,
+   data: data,
+   dataType: dataType,
+   success: function () {},
+   error: function () {}
+});
+```
+
+是对原生XHR的封装，除此以外还增添了对JSONP的支持。
+
+缺点：
+
+- 本身是针对MVC的编程,不符合现在前端MVVM的浪潮
+- 基于原生的XHR开发，XHR本身的架构不清晰，已经有了fetch的替代方案
+- JQuery整个项目太大，单纯使用ajax却要引入整个JQuery非常的不合理（采取个性化打包的方案又不能享受CDN服务）
+
+### Axios
+
+```js
+axios({
+    method: 'post',
+    url: '/user/12345',
+    data: {
+        firstName: 'Fred',
+        lastName: 'Flintstone'
+    }
+})
+.then(function (response) {
+    console.log(response);
+})
+.catch(function (error) {
+    console.log(error);
+});
+```
+
+Axios本质上也是对原生XHR的封装，只不过它是Promise的实现版本，符合最新的ES规范，从它的官网上可以看到它有以下几条特性：
+
+- 从 node.js 创建 http 请求
+- 支持 Promise API
+- 客户端支持防止CSRF
+- **提供了一些并发请求的接口**（axios.all和axios.spread）
+
+这个支持防止CSRF其实挺好玩的，是怎么做到的呢，就是让你的每个请求都带一个从cookie中拿到的key, 根据浏览器同源策略，假冒的网站是拿不到你cookie中得key的，这样，后台就可以轻松辨别出这个请求是否是用户在假冒网站上的误导输入，从而采取正确的策略。
+
+### Fetch
+
+Fetch API提供了一个JavaScript 接口，用于访问和操纵HTTP 管道的部分，例如请求和响应。
+
+1. 它提供了一个全局的`fetch()`方法，该方法提供了一种简单，合理的方式来跨网络以获取资源。 fetch 是一种 HTTP 数据请求方式，是 XMLHTTPRequest 的一种替代方案。 fetch 不是 ajax 的进一步封装，而是原生 js。 Fetch 函数就是原生 js。
+
+2. 当接收到一个代表错误的HTTP状态码时，从`fetch()`返回的Promise 不会被标记为reject，即使该HTTP相应的状态码是404 或者 500。 相反，它会将Promise状态标记为 resolve,仅当网络故障时或请求被阻止时，才会标记为reject。
+
+3. 默认情况， fetch不会从服务端发送或接受任何cookie，如果站点依赖于用户session，则会导致未经认证的请求。
+4. **response** 这里的response 只是一个HTTP响应，而不是真的JSON。为了获取JSON的内容我们需要使用对应的 .json() 、.text() 、 .blob()方法。
+
+**优缺点：**
+
+- 符合关注分离，没有将输入、输出和用事件来跟踪的状态混在一个对象里。
+- 更加底层，提供了API丰富（request、response）
+- 脱离了XHR，是ES规范里新的实现方式
+- 1. fetch 只对网络请求报错，对400/500 都当成功的请求，需要封装去处理
+- 2. fetch 默认不会带cookie，需要添加配置项
+- 3. etch不支持abort，不支持超时控制，使用setTimeout 及 Promise.reject 的实现的超时控制并不能阻止请求过程继续在后台运行，造成了量的浪费
+- 4. fetch没有办法原生检测请求的进度，而XHR可以
 

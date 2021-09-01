@@ -210,7 +210,7 @@ display:flex;
 </style>
     <div class="main">
         <div class="left"></div>        
-        <div class="center"></div>
+        <div class="right"></div>
         <div class="middle"></div>
     </div>
 ```
