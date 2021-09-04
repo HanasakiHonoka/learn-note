@@ -87,6 +87,22 @@
 
 6）服务器只要收到了客户端发出的确认，立即进入CLOSED状态。同样，撤销TCB后，就结束了这次的TCP连接。可以看到，服务器结束TCP连接的时间要比客户端早一些。
 
+**进阶**
+三次握手内核逻辑
+[![haYna9.png](https://z3.ax1x.com/2021/08/31/haYna9.png)](https://imgtu.com/i/haYna9)
+[![haYTLF.png](https://z3.ax1x.com/2021/08/31/haYTLF.png)](https://imgtu.com/i/haYTLF)
+
+1. 服务器 listen 时，计算了全/半连接队列的长度，还申请了相关内存并初始化。
+2. 客户端 connect 时，把本地 socket 状态设置成了 TCP_SYN_SENT，选则一个可用的端口，发出 SYN 握手请求并启动重传定时器。
+3. 服务器响应 ack 时，会判断下接收队列是否满了，满的话可能会丢弃该请求。否则发出 synack，申请 request_sock 添加到半连接队列中，同时启动定时器。
+4. 客户端响应 synack 时，清除了 connect 时设置的重传定时器，把当前 socket 状态设置为 ESTABLISHED，开启保活计时器后发出第三次握手的 ack 确认。
+5. 服务器响应 ack 时，把对应半连接对象删除，创建了新的 sock 后加入到全连接队列中，最后将新连接状态设置为 ESTABLISHED。
+6. accept 从已经建立好的全连接队列中取出一个返回给用户进程。
+
+另外要注意的是，如果握手过程中发生丢包（网络问题，或者是连接队列溢出），内核会等待定时器到期后重试，重试时间间隔在 3.10 版本里分别是 1s 2s 4s …。在一些老版本里，比如 2.6 里，第一次重试时间是 3 秒。最大重试次数分别由 tcp_syn_retries 和 tcp_synack_retries 控制。
+
+如果你的线上接口正常都是几十毫秒内返回，但偶尔出现了 1 s、或者 3 s 等这种偶发的响应耗时变长的问题，那么你就要去定位一下看看是不是出现了握手包的超时重传了。
+
 **常见面试题**
 
 【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？
@@ -253,7 +269,7 @@ ARP协议是“Address Resolution Protocol”（地址解析协议）的缩写�
 
 ## HTTP状态码
 
-![状态码](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019/7/状态码.png)
+[![fKf6JJ.png](https://z3.ax1x.com/2021/08/07/fKf6JJ.png)](https://imgtu.com/i/fKf6JJ)
 
 * 200 OK：客户端请求成功。
 * 400 Bad Request：客户端请求有语法错误，不能被服务器所理解。
@@ -269,7 +285,7 @@ ARP协议是“Address Resolution Protocol”（地址解析协议）的缩写�
 
 图片来源：《图解HTTP》
 
-![各种协议与HTTP协议之间的关系](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019/7/各种协议与HTTP协议之间的关系.png)
+[![fKfcW9.png](https://z3.ax1x.com/2021/08/07/fKfcW9.png)](https://imgtu.com/i/fKfcW9)
 
 
 ## 八  HTTP长连接,短连接
@@ -296,7 +312,6 @@ HTTP 是一种不保存状态，即无状态（stateless）协议。也就是说
 
 最常用的就是利用 URL 重写把 Session ID 直接附加在URL路径的后面。
 
-![HTTP是无状态协议](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/HTTP是无状态的.png)
 
 ## 十 Cookie的作用是什么?和Session有什么区别？
 

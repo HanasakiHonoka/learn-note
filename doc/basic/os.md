@@ -19,8 +19,6 @@
 
 🙋 **我** ：介绍系统调用之前，我们先来了解一下用户态和系统态。
 
-![](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/006r3PQBjw1fbimb5c3srj30b40b40t9-20200404224750646.jpg)
-
 根据进程访问资源的特点，我们可以把进程在系统上的运行分为两个级别：
 
 1. 用户态(user mode) : 用户态运行的进程可以直接读取用户程序的数据。
@@ -70,7 +68,7 @@
 
 > 订正：下图中 running 状态被 interrupt 向 ready 状态转换的箭头方向反了。
 
-![process-state](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/d38202593012b457debbcd74994c6292.png)
+[![fKWOVU.png](https://z3.ax1x.com/2021/08/07/fKWOVU.png)](https://imgtu.com/i/fKWOVU)
 
 ### 2.3 进程间的通信方式
 
@@ -139,8 +137,6 @@
 
 🙋 **我** ：谢谢面试官！刚刚把这个给忘记了～
 
-<img src="https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/6af89bc8gw1f8txoxc2asj20k00k0mxv.jpg" alt="这就很尴尬了_尴尬表情" height="200" width="200"/>
-
 ### 3.3 快表和多级页表
 
 👨‍💻**面试官** ： 页表管理机制中有两个很重要的概念：快表和多级页表，这两个东西分别解决了页表管理中很重要的两个问题。你给我简单介绍一下吧！
@@ -179,7 +175,6 @@
 
 🙋 **我** ：
 
-<img src="https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/de80a5ably1gcuslckpygg208c08cwfu.gif"  height="200" width="200"></img>
 
 1. **共同点** ：
    - 分页机制和分段机制都是为了提高内存利用率，较少内存碎片。
@@ -200,7 +195,6 @@
 
 🙋 **我** ：这部分我真不清楚！
 
-<img src="https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/a9cf8ef6ly1fhqpdipcyfj20ce0b4wex.jpg .jpeg"  height="300px" />
 
 于是面试完之后我默默去查阅了相关文档！留下了没有技术的泪水。。。
 
@@ -208,7 +202,7 @@
 
 现代处理器使用的是一种称为 **虚拟寻址(Virtual Addressing)** 的寻址方式。**使用虚拟寻址，CPU 需要将虚拟地址翻译成物理地址，这样才能访问到真实的物理内存。** 实际上完成虚拟地址转换为物理地址转换的硬件是 CPU 中含有一个被称为 **内存管理单元（Memory Management Unit, MMU）** 的硬件。如下图所示：
 
-![MMU_principle_updated](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/2b27dac8cc647f8aac989da2d1166db2.png)
+[![fKfKMt.png](https://z3.ax1x.com/2021/08/07/fKfKMt.png)](https://imgtu.com/i/fKfKMt)
 
 **为什么要有虚拟地址空间呢？**
 
