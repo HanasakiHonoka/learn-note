@@ -30,4 +30,4 @@
 * [**LeetCode**](leetcode/)
   * [Hot100总结](leetcode/Hot100总结.md)
   * [常用模板](leetcode/template.md)
-  * [常用排序算法](leetcode/常用算法模板.md)
+  * [常用算法模板](leetcode/常用算法模板.md)
