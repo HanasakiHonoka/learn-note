@@ -25,6 +25,7 @@
   * [面试考点-HTTP](frontend/面试考点-HTTP)
   * [面试考点-JavaScript](frontend/面试考点-JavaScript)
   * [面试考点-项目相关](frontend/面试考点-项目相关)
+  * [面试考点-常见排序](frontend/面试考点-常见排序)
 * [**前端**](frontend2/)
   * [前端笔记](frontend2/笔记)
 * [**LeetCode**](leetcode/)

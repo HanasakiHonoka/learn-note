@@ -83,13 +83,27 @@ obj = new Proxy(obj, {
   })
 ```
 
-##### Object.defineP roperty和Proxy的区别
+##### Object.defineProperty和Proxy的区别
+
+- *defineproperty只能监听某个属性不能全对象监听*
+
+  proxy不用设置具体属性
+
+  defineproperty监听需要知道那个对象的那个属性，而proxy只需要知道那个对象就可以了。也就是会省去for in 循环提高了效率
 
 - Object.defineProperty对对象自身做修改, 而Proxy只是在Object基础上加一层拦截，不修改原对象
+
 - 监听不了数组的变化
+
 - 监听手段比较单一，只能监听set和get, Proxy有10几种监听
+
 - 必须得把所有的属性全部添加defineProperty, Proxy对整个对象都会进行拦截
+
 - Proxy是代理在`对象`级别的，defineProperty是代理到`静态的值`级别，所以Proxy的强大就在这里
+
+- Proxy可以监听的类型：
+
+  <img src="https://z3.ax1x.com/2021/09/07/hInWJx.png" alt="hInWJx.png" style="zoom:50%;" />
 
 #### Proxy监听数组访问
 
@@ -111,7 +125,11 @@ console.log('push结束了');
 // 操作了数组 push
 ```
 
+#### .configurable：可配执行 .enumerble：枚举性 .writable:可读写性 .value:数据值
 
+1) 在使用Object.defineProperty、Object.defineProperties 或 Object.create 函数的情况下添加数据属性，writable、enumerable和configurable默认值为false。
+
+2) 使用对象直接量创建的属性，writable、enumerable和configurable特性默认为true。
 
 ## React
 
