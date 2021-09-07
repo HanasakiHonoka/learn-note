@@ -18,6 +18,7 @@
   * [Redis](framework/redis.md)
   * [Nginx](framework/nginx.md)
 * [**前端**](frontend/)
+  * [面试考点-计算机基础](frontend/面试考点-计算机基础)
   * [面试考点-React&VUE](frontend/面试考点-React&VUE)
   * [面试考点-浏览器&性能](frontend/面试考点-浏览器&性能)
   * [面试考点-设计模式](frontend/面试考点-设计模式)
