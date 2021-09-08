@@ -17,6 +17,7 @@
   * [SpringMVC](framework/springmvc)
   * [Redis](framework/redis.md)
   * [Nginx](framework/nginx.md)
+  * [高可用](framework/高可用.md)
 * [**前端**](frontend/)
   * [面试考点-计算机基础](frontend/面试考点-计算机基础)
   * [面试考点-React&VUE](frontend/面试考点-React&VUE)
