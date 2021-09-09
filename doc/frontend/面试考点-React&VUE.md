@@ -1,14 +1,32 @@
 ## Vue和React的区别
 
-1. **模版vsJSX**
+1. **模版 vs JSX**
 
-React与Vue最大的不同是模板的编写。Vue鼓励你去写近似常规HTML的模板。写起来很接近标准HTML元素，只是多了一些属性。这些属性也可以被使用在单文件组件中，尽管它需要在在构建时将组件转换为合法的JavaScript和HTML。Vue鼓励你去使用HTML模板去进行渲染，使用相似于Angular风格的方法去输出动态的内容。因此，通过把原有的模板整合成新的Vue模板，Vue很容易提供旧的应用的升级。这也让新来者很容易适应它的语法。 
+React与Vue最大的不同是模板的编写。Vue鼓励你去写近似常规HTML的模板。写起来很接近标准HTML元素，只是多了一些属性。这些属性也可以被使用在单文件组件中，尽管它需要在在构建时将组件转换为合法的JavaScript和HTML。Vue鼓励你去使用HTML模板去进行渲染，因此，通过把原有的模板整合成新的Vue模板，Vue很容易提供旧的应用的升级。这也让新来者很容易适应它的语法。 
 
-另一方面，React推荐你所有的模板通用JavaScript的语法扩展——JSX书写。React/JSX乍看之下，觉得非常啰嗦，但使用JavaScript而不是模板来开发，赋予了开发者许多编程能力。JSX只是JavaScript混合着XML语法，然而一旦你掌握了它，它使用起来会让你感到畅快。 而相反的观点是Vue的模板语法去除了往视图/组件中添加逻辑的诱惑，保持了关注点分离。 值得一提的是，与React一样，Vue在技术上也支持render函数和JSX，但只是不是默认的而已。
+另一方面，React推荐你所有的模板通用JavaScript的语法扩展——JSX书写。React/JSX乍看之下，觉得非常啰嗦，但使用JavaScript而不是模板来开发。JSX只是JavaScript混合着XML语法，然而一旦你掌握了它，它使用起来会让你感到畅快。 而相反的观点是Vue的模板语法去除了往视图/组件中添加逻辑的诱惑，保持了**关注点分离**。 值得一提的是，与React一样，Vue在技术上也支持render函数和JSX，但只是不是默认的而已。
 
-2. **状态管理 vs 对象属性**
+2. **数据是不是可变的**
 
-如果你对React熟悉，你就会知道应用中的状态是（React）关键的概念。也有一些配套框架被设计为管理一个大的state对象，如Redux。此外，state对象在React应用中是不可变的，意味着它不能被直接改变（这也许不一定正确）。在React中你需要使用setState()方法去更新状态。在Vue中，state对象并不是必须的，数据由data属性在Vue对象中进行管理。而在Vue中，则不需要使用如setState()之类的方法去改变它的状态，在Vue对象中，data参数就是应用中数据的保存者。 对于管理大型应用中的状态这一话题而言，Vue.js的作者尤雨溪曾说过，（Vue的）解决方案适用于小型应用，但对于对于大型应用而言不太适合。
+react整体是函数式的思想，把组件设计成纯组件，状态和逻辑通过参数传入，所以在react中，是单向数据流，推崇结合immutable来实现数据不可变。react在setState之后会重新走渲染的流程，如shouldComponentUpdate返回的是true，就继续渲染，如果返回了false，就不会重新渲染，PureComponent就是重写了shouldComponentUpdate，然后在里面作了props和state的浅层对比。
+
+而vue的思想是响应式的，也就是基于是数据可变的，通过对每一个属性建立Watcher来监听，当属性变化的时候，响应式的更新对应的虚拟dom。
+
+总之，react的性能优化需要手动去做，而vue的性能优化是自动的，但是vue的响应式机制也有问题，就是当state特别多的时候，Watcher也会很多，会导致卡顿，所以大型应用（状态特别多的）一般用react，更加可控。
+
+3. **类式的组件写法，还是声明式的写法**
+
+react是类式的写法，api很少，而vue是声明式的写法，通过传入各种options，api和参数都很多。所以react结合typescript更容易一起写，vue稍微复杂。vue结合vue-class-component也可以实现类式的写法，但是还是需要通过decorator来添加声明，并不纯粹。
+
+react可以通过高阶组件（Higher Order Components--HOC）来扩展，而vue需要通过mixins来扩展.React刚开始也有mixin的写法，通过React.createClass的api，不过现在很少用了。
+ Vue也不是不能实现高阶组件，只是特别麻烦，因为Vue对与组件的option做了各种处理，想实现高阶组件就要知道每一个option是怎么处理的，然后正确的设置。
+
+4. **什么功能内置，什么交给社区去做**
+
+react做的事情很少，很多都交给社区去做，vue很多东西都是内置的，写起来确实方便一些，
+比如 redux的combineReducer就对应vuex的modules，比如reselect就对应vuex的getter和vue组件的computed, vuex的mutation是直接改变的原始数据，而redux的reducer是返回一个全新的state，所以redux结合immutable来优化性能，vue不需要。
+
+**react整体的思路就是函数式，所以推崇纯组件，数据不可变，单向数据流，当然需要双向的地方也可以做到，比如结合redux-form，而vue是基于可变数据的，支持双向绑定。react组件的扩展一般是通过高阶组件，而vue组件会使用mixin。vue内置了很多功能，而react做的很少，很多都是由社区来完成的，vue追求的是开发的简单，而react更在乎方式是否正确。**
 
 ##  Vue
 
@@ -158,6 +176,8 @@ console.log('push结束了');
 - getDerivedStateFromProps(nextProps, prevState)
 -  getSnapshotBeforeUpdate(prevProps, prevState)
 
+![hL7su6.md.png](https://z3.ax1x.com/2021/09/09/hL7su6.md.png)
+
 ### 虚拟DOM
 
 所谓的Virtual DOM基本上说就是它名字的意思：虚拟DOM，DOM树的虚拟表现。它的诞生是基于这么一个概念：改变真实的DOM状态远比改变一个JavaScript对象的花销要大得多。 Virtual DOM是一个映射真实DOM的JavaScript对象，如果需要改变任何元素的状态，那么是先在Virtual DOM上进行改变，而不是直接改变真实的DOM。当有变化产生时，一个新的Virtual DOM对象会被创建并计算新旧Virtual DOM之间的差别。之后这些差别会应用在真实的DOM上。 
@@ -203,6 +223,241 @@ React发现这样操作非常繁琐冗余，因为这些集合里含有相同的
 针对这一现象，React 提出了优化策略：
 
 允许开发者对同一层级的同组子节点，添加唯一key进行区分，虽然只是小小的改动，但性能上却发生了翻天覆地的变化。
+
+## Redux
+
+### redux 为什么要把 reducer 设计成纯函数
+
+### 1. redux三大原则
+
+1. 单一数据流 整个应用state都被储存在一个store里面 构成一个Object tree
+2. State是只读的 唯一改变state的方法就是触发action, action是一个用于描述已发生事件的普通对象
+3. 使用纯函数来执行修改 为了描述action如何改变state tree， 你需要编写reducers
+
+把reducer设计成纯函数，可以实现时间旅行，记录/回放或者热加载
+首先你得看看文档怎么说reducer的作用的，‘**接收旧的 state 和 action，返回新的 state**’，您可得瞧好咯，他就是起一个对数据做简单处理后返回state的作用，为什么只起这个作用，这时用设计这个词回答这个问题才恰当，**因为redux把reducer设计成只负责这个作用**。很白痴的问答对吧，所以题目的答案也就简单了，reducer的职责不允许有副作用，副作用简单来说就是不确定性，如果reducer有副作用，那么返回的state就不确定，**举个例子**，你的reducer就做了一个value = value + 1这个逻辑，然后返回state为{value}，ok，这个过程太jr纯了，然后你可能觉得要加个请求来取得value后再加1，那么你的逻辑就是value = getValue() + 1, getValue是个请求函数，返回一个值，这种情况，退一万步讲，如果你的网络请求这次出错，那么getValue就返回的不是一个数值，value就不确定了，所以return的state你也不确定了，前端UI拿到的数据也不确定了，所以就是这个环节引入了副作用，redux设计好的规范就被你破坏了，redux就没卵用了。
+
+最后我回答下如何解决这个副作用，实际上也很白痴的问题，这里的请求可以放在reducer之前，你先请求，该做出错处理的就做出错处理，等拿到实际数据后在发送action来调用reducer。这样通过前移副作用的方式，使reducer变得纯洁。
+
+### 2. 在 React 中如何使用 Redux 的 connect() ?
+
+您需要按照两个步骤在容器中使用您的 Store：
+
+1. **使用`mapStateToProps()`：**它将 Store 中的状态变量映射到您指定的属性。
+
+2. **将上述属性连接到容器：**`mapStateToProps`函数返回的对象连接到容器。你可以从`react-redux`导入`connect()`。
+
+   ```js
+   import React from 'react'
+   import { connect } from 'react-redux'
+   
+   class App extends React.Component {
+     render() {
+       return <div>{this.props.containerData}</div>
+     }
+   }
+   
+   function mapStateToProps(state) {
+     return { containerData: state.data }
+   }
+   
+   export default connect(mapStateToProps)(App)
+   ```
+
+### 3. mapStateToProps() 和 mapDispatchToProps() 之间有什么区别?
+
+`mapStateToProps()`是一个实用方法，它可以帮助您的组件获得最新的状态（由其他一些组件更新）：
+
+```js
+const mapStateToProps = (state) => {
+  return {
+    todos: getVisibleTodos(state.todos, state.visibilityFilter)
+  }
+}
+```
+
+`mapDispatchToProps()`是一个实用方法，它可以帮助你的组件触发一个动作事件（可能导致应用程序状态改变的调度动作）：
+
+```js
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onTodoClick: (id) => {
+      dispatch(toggleTodo(id))
+    }
+  }
+}
+```
+
+### 4. 为什么 Redux 状态函数称为 reducers ?
+
+Reducers 总是返回状态的累积（基于所有先前状态和当前 Action）。因此，它们充当了状态的 Reducer。每次调用 Redux reducer 时，状态和 Action 都将作为参数传递。然后基于该 Action 减少（或累积）该状态，然后返回下一状态。您可以*reduce*一组操作和一个初始状态（Store），在该状态下执行这些操作以获得最终的最终状态。
+
+### 5. 如何在 Redux 中发起 AJAX 请求?
+
+您可以使用`redux-thunk`中间件，它允许您定义异步操作。
+
+让我们举个例子，使用*fetch API*将特定帐户作为 AJAX 调用获取：
+
+```js
+export function fetchAccount(id) {
+  return dispatch => {
+    dispatch(setLoadingAccountState()) // Show a loading spinner
+    fetch(`/account/${id}`, (response) => {
+      dispatch(doneFetchingAccount()) // Hide loading spinner
+      if (response.status === 200) {
+        dispatch(setAccount(response.json)) // Use a normal function to set the received state
+      } else {
+        dispatch(someError)
+      }
+    })
+  }
+}
+
+function setAccount(data) {
+ return { type: 'SET_Account', data: data }
+}
+```
+
+### 6. 访问 Redux Store 的正确方法是什么?
+
+在组件中访问 Store 的最佳方法是使用`connect()`函数，该函数创建一个包裹现有组件的新组件。此模式称为*高阶组件*，通常是在 React 中扩展组件功能的首选方式。这允许您将状态和 Action 创建者映射到组件，并在 Store 更新时自动传递它们。
+
+我们来看一个使用 connect 的`<FilterLink>`组件的例子：
+
+```js
+import { connect } from 'react-redux'
+import { setVisibilityFilter } from '../actions'
+import Link from '../components/Link'
+
+const mapStateToProps = (state, ownProps) => ({
+  active: ownProps.filter === state.visibilityFilter
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  onClick: () => dispatch(setVisibilityFilter(ownProps.filter))
+})
+
+const FilterLink = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Link)
+
+export default FilterLink
+```
+
+由于它具有相当多的性能优化并且通常不太可能导致错误，因此 Redux 开发人员几乎总是建议使用`connect()`直接访问 Store（使用上下文API）。
+
+```js
+class MyComponent {
+  someMethod() {
+    doSomethingWith(this.context.store)
+  }
+}
+```
+
+### 7. React Redux 中展示组件和容器组件之间的区别是什么?
+
+**展示组件**是一个类或功能组件，用于描述应用程序的展示部分。
+
+**容器组件**是连接到 Redux Store的组件的非正式术语。容器组件*订阅*Redux 状态更新和*dispatch*操作，它们通常不呈现 DOM 元素；他们将渲染委托给展示性的子组件。
+
+### 8. Redux 中常量的用途是什么?
+
+常量允许您在使用 IDE 时轻松查找项目中该特定功能的所有用法。它还可以防止你拼写错误，在这种情况下，你会立即得到一个`ReferenceError`。
+
+通常我们会将它们保存在一个文件中（`constants.js`或`actionTypes.js`）。
+
+```js
+export const ADD_TODO = 'ADD_TODO'
+export const DELETE_TODO = 'DELETE_TODO'
+export const EDIT_TODO = 'EDIT_TODO'
+export const COMPLETE_TODO = 'COMPLETE_TODO'
+export const COMPLETE_ALL = 'COMPLETE_ALL'
+export const CLEAR_COMPLETED = 'CLEAR_COMPLETED'
+```
+
+在 Redux 中，您可以在两个地方使用它们：
+
+1. **在 Action 创建时:**
+
+   让我们看看`actions.js`:
+
+   ```js
+   import { ADD_TODO } from './actionTypes';
+   
+   export function addTodo(text) {
+     return { type: ADD_TODO, text }
+   }
+   ```
+
+2. **在 reducers 里:**
+
+   让我们创建`reducer.js`文件:
+
+   ```js
+   import { ADD_TODO } from './actionTypes'
+   
+   export default (state = [], action) => {
+     switch (action.type) {
+       case ADD_TODO:
+         return [
+           ...state,
+           {
+             text: action.text,
+             completed: false
+           }
+         ];
+       default:
+         return state
+     }
+   }
+   ```
+
+### 9. 什么是 redux-saga?
+
+`redux-saga`是一个库，旨在使 React/Redux 项目中的副作用（数据获取等异步操作和访问浏览器缓存等可能产生副作用的动作）更容易，更好。
+
+这个包在 NPM 上有发布:
+
+```shell
+$ npm install --save redux-saga
+```
+
+#### redux-saga 的模型概念是什么?
+
+*Saga*就像你的项目中的一个单独的线程，它独自负责副作用。`redux-saga`是一个 redux*中间件*，这意味着它可以在项目启动中使用正常的 Redux 操作，暂停和取消该线程，它可以访问完整的 Redux 应用程序状态，并且它也可以调度 Redux 操作。
+
+#### 在 redux-saga 中`call()`和`put()`之间有什么区别?
+
+`call()`和`put()`都是 Effect 创建函数。`call()`函数用于创建 Effect 描述，指示中间件调用 promise。`put()`函数创建一个 Effect，指示中间件将一个 Action 分派给 Store。
+
+让我们举例说明这些 Effect 如何用于获取特定用户数据。
+
+```
+~~~js
+function* fetchUserSaga(action) {
+  // `call` function accepts rest arguments, which will be passed to `api.fetchUser` function.
+  // Instructing middleware to call promise, it resolved value will be assigned to `userData` variable
+  const userData = yield call(api.fetchUser, action.userId)
+
+  // Instructing middleware to dispatch corresponding action.
+  yield put({
+    type: 'FETCH_USER_SUCCESS',
+    userData
+  })
+}
+~~~
+```
+
+#### 什么是 Redux Thunk?
+
+*Redux Thunk*中间件允许您编写返回函数而不是 Action 的创建者。 thunk 可用于延迟 Action 的发送，或仅在满足某个条件时发送。内部函数接收 Store 的方法`dispatch()`和`getState()`作为参数。
+
+#### `redux-saga`和`redux-thunk`之间有什么区别?
+
+*Redux Thunk*和*Redux Saga*都负责处理副作用。在大多数场景中，Thunk 使用*Promises*来处理它们，而 Saga 使用*Generators*。Thunk 易于使用，因为许多开发人员都熟悉 Promise，Sagas/Generators 功能更强大，但您需要学习它们。但是这两个中间件可以共存，所以你可以从 Thunks 开始，并在需要时引入 Sagas。
+
+
 
 ## jquery ajax, Axios, Fetch区别
 
