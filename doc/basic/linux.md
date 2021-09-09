@@ -189,3 +189,7 @@ Linux 系统是一个多用户多任务的分时操作系统，任何一个要�
 - **`shutdown`：** `shutdown -h now`： 指定现在立即关机；`shutdown +5 "System will shutdown after 5 minutes"`：指定 5 分钟后关机，同时送出警告信息给登入用户。
 
 - **`reboot`：** **`reboot`：** 重开机。**`reboot -w`：** 做个重开机的模拟（只有纪录并不会真的重开机）。
+
+## 多路io复用 select、poll、epoll
+
+### 进程
