@@ -30,6 +30,9 @@ beforeDestroy
 
 destroyed
 
+### Vue组件通信
+父组件A通过props的方式向子组件B传递，B to A 通过在 B 组件中 $emit, A 组件中 v-on 的方式实现
+
 ### Vue双向绑定原理
 
 在Vue2.0中，数据双向绑定就是通过 Object.defineProperty 去监听对象的每一个属性，然后在get,set方法中通过发布订阅者模式来实现的数据响应，但是存在一定的缺陷，比如只能监听已存在的属性，对于新增删除属性就无能为力了，同时无法监听数组和对象的变化，所以在Vue3.0中将其换成了功能更强大的Proxy。
@@ -132,6 +135,10 @@ console.log('push结束了');
 2) 使用对象直接量创建的属性，writable、enumerable和configurable特性默认为true。
 
 ## React
+
+它使用虚拟DOM而不是真实DOM。
+它使用服务器端渲染。
+它遵循单向数据流或数据绑定
 
 ### React的生命周期
 
