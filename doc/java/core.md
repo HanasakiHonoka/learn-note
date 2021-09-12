@@ -255,7 +255,7 @@ try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(new F
 >该状态是指线程刚创建，尚未启动。
 
 2. RUNNABLE
-   
+
 >表示线程正在正常运行中，当然可能会有某种耗时计算/IO等待的操作/CPU时间片切换等，这个状态下发生的等待一般是其他系统资源，而不是锁、Sleep等。
 
 3. BLOCKED
