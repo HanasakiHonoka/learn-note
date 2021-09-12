@@ -1437,3 +1437,223 @@ threadnum:7is finish
 ## ReentrantLock 和 ReentrantReadWriteLock
 
 ReentrantLock 和 synchronized 的区别在上面已经讲过了这里就不多做讲解。另外，需要注意的是：读写锁 ReentrantReadWriteLock 可以保证多个线程可以同时读，所以在读操作远大于写操作的时候，读写锁就非常有用了。
+
+
+
+# 双线程分奇偶打印1-100
+## 使用volatile修饰的flag作为标志位
+```java
+public class ThreadTest {
+	volatile int flag=0;
+	public void runThread() throws InterruptedException{
+ 	   Thread t1=new Thread(new Thread1());
+ 	   Thread t2=new Thread(new Thread2());
+ 	   t1.start();
+ 	   t2.start();
+	}
+	public class Thread1 implements Runnable{
+		public void run() {
+			int i=0;
+			while(i<=99){
+				if(flag==0)
+				{
+					System.out.println("t1="+i+"flag="+flag);
+					i+=2;
+					flag=1;
+				}
+			}
+		}
+		
+	}
+	
+	public class Thread2 implements Runnable{
+		public void run() {
+			int i=1;
+			while(i<=99){
+				if(flag==1)
+				{
+					System.out.println("t2="+i+"flag="+flag);
+					i+=2;
+					flag=0;
+				}
+			}
+		}
+		
+	}
+}
+```
+
+## 内置锁
+- 同步：synchronized
+- 协作：Object # wait/notify/notifyAll
+```java
+public class PrintNumber {
+ 
+    /**
+     * 打印锁，同一时刻仅有一个任务可以持有此锁
+     */
+    private static Object lock = new Object();
+ 
+    /**
+     * 计数器
+     */
+    private static int counter = 1;
+ 
+    /**
+     * 计数器最大值
+     */
+    private static final int MAX_COUNTER = 100;
+ 
+    public static void main(String args[]) {
+        // 奇数打印线程
+        Thread oddThread = new Thread() {
+            @Override
+            public void run() {
+                // 请求打印锁
+                synchronized (lock) {
+                    while (counter <= MAX_COUNTER) {
+                        // counter为奇数，打印counter并唤醒偶数打印线程
+                        if (counter % 2 != 0) {
+                            System.out.println("Thread1 : " + counter);
+                            counter = counter + 1;
+                            lock.notifyAll();
+                        }
+                        // counter为偶数，挂起并等待偶数打印线程唤醒
+                        else {
+                            try {
+                                lock.wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+ 
+        // 偶数打印线程
+        Thread evenThread = new Thread() {
+            @Override
+            public void run() {
+                // 请求打印锁
+                synchronized (lock) {
+                    while (counter <= MAX_COUNTER) {
+                        // counter为偶数，打印counter并唤醒奇数打印线程
+                        if (counter % 2 == 0) {
+                            System.out.println("Thread2 : " + counter);
+                            counter = counter + 1;
+                            lock.notifyAll();
+                        }
+                        // counter为奇数，挂起并等待奇数打印线程唤醒
+                        else {
+                            try {
+                                lock.wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+ 
+ 
+        oddThread.start();
+        evenThread.start();
+    }
+ 
+}
+```
+
+## 显式锁
+- 同步：lock/unlock
+- 协作：Condition # await/signal/signalAll
+```java
+public class PrintNumber {
+ 
+    /**
+     * 打印锁，同一时刻仅有一个任务可以持有此锁
+     */
+    private static Lock lock = new ReentrantLock();
+ 
+    private static Condition oddCondition = lock.newCondition();
+ 
+    private static Condition evenCondition = lock.newCondition();
+ 
+    /**
+     * 计数器
+     */
+    private static int counter = 1;
+ 
+    /**
+     * 计数器最大值
+     */
+    private static final int MAX_COUNTER = 100;
+ 
+    public static void main(String args[]) {
+        // 奇数打印线程
+        Thread oddThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    // 请求打印锁
+                    lock.lock();
+                    while (counter <= MAX_COUNTER) {
+                        // counter为奇数，打印counter并唤醒偶数打印线程
+                        if (counter % 2 != 0) {
+                            System.out.println("Thread1 : " + counter);
+                            counter = counter + 1;
+                            evenCondition.signalAll();
+                        }
+                        // counter为偶数，挂起并等待偶数打印线程唤醒
+                        else {
+                            try {
+                                oddCondition.await();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } finally {
+                    // 释放打印锁
+                    lock.unlock();
+                }
+            }
+        };
+ 
+        // 偶数打印线程
+        Thread evenThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    // 请求打印锁
+                    lock.lock();
+                    while (counter <= MAX_COUNTER) {
+                        // counter为偶数，打印counter并唤醒奇数打印线程
+                        if (counter % 2 == 0) {
+                            System.out.println("Thread2 : " + counter);
+                            counter = counter + 1;
+                            oddCondition.signalAll();
+                        }
+                        // counter为奇数，挂起并等待奇数打印线程唤醒
+                        else {
+                            try {
+                                evenCondition.await();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } finally {
+                    // 释放打印锁
+                    lock.unlock();
+                }
+            }
+        };
+ 
+        oddThread.start();
+        evenThread.start();
+    }
+ 
+}
+```
