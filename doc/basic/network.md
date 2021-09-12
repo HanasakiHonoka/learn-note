@@ -335,6 +335,10 @@ ARP协议是“Address Resolution Protocol”（地址解析协议）的缩写�
 * 404 Not Found：请求资源不存在，举个例子：输入了错误的URL。
 * 500 Internal Server Error：服务器发生不可预期的错误。
 * 503 Server Unavailable：服务器当前不能处理客户端的请求，一段时间后可能恢复正常，举个例子：HTTP/1.1 200 OK（CRLF）。
+  
+
+## 常用的HTTP请求头与响应头
+https://itbilu.com/other/relate/EJ3fKUwUx.html
 
 
 ## 七 各种协议与HTTP协议之间的关系
@@ -510,3 +514,8 @@ SSL 使用序列号来保护通讯方免受报文重放攻击。这个序列号�
 ⑨ 服务器向客户端发出信息，指明后面的数据通讯将使用的步骤 ⑦ 中的主密码为对称密钥，同时通知客户端服务器端的握手过程结束。
 
 ⑩ SSL 的握手部分结束，SSL 安全通道的数据通讯开始，客户和服务器开始使用相同的对称密钥进行数据通讯，同时进行通讯完整性的检验。
+
+**扩展：加密算法**
+
+> 对称加密：DES、AES和IDEA等。  
+> 非对称加密：RSA、Elgamal、背包算法、Rabin、D-H、ECC（椭圆曲线加密算法）等。
