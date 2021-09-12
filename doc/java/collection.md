@@ -347,6 +347,7 @@ do {
 ```
 
 而我们的线程二执行完成了。于是我们有下面的这个样子。
+
 ![](https://coolshell.cn/wp-content/uploads/2013/05/HashMap02.jpg)
 
 注意，因为Thread1的 e 指向了key(3)，而next指向了key(7)，其在线程二rehash后，指向了线程二重组后的链表。我们可以看到链表的顺序被反转后。  
@@ -362,6 +363,7 @@ do {
 3）一切安好。
 
 线程一接着工作。把key(7)摘下来，放到newTable[i]的第一个，然后把e和next往下移。
+
 ![](https://coolshell.cn/wp-content/uploads/2013/05/HashMap04.jpg)
 
 4）环形链接出现。
