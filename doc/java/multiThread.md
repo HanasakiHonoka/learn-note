@@ -724,18 +724,18 @@ public class ThreadPoolTest {
 
 
 **`workQueue` 工作队列:**
-- **`ArrayBlockingQueue`**：用数组实现的有界阻塞队列，按FIFO排序。
-- **`LinkedBlockingQueue`**：可以有界，也可以无界。基于链表实现的阻塞队列。`newFixedThreadPool`线程池使用了这个队列。
-- **`SynchronousQueue`**：没有容量，每一个插入操作都要等待一个相应的删除操作，反之，每一个删除操作都要等待对应的插入操作。如使用SynchronousQueue，提交的任务不会被真实的保存，而总是将新任务提交给线程执行，如果没有空闲的进程，则尝试创建新的进程，如果进程的数量已达到最大值，则执行拒绝策略。`newCachedThreadPool`的默认队列。
-- **`PriorityBlockingQueue`**：一个支持优先级排序的无界阻塞队列。
-- **`DelayQueue`**：一个使用优先级队列实现的无界阻塞队列，只有在延迟期满时才能从中提取元素。根据指定的执行时间从小到大排序，否则根据插入到队列的先后排序。`newScheduledThreadPool`线程池使用了这个队列。
+- **`ArrayBlockingQueue`：** 用数组实现的有界阻塞队列，按FIFO排序。
+- **`LinkedBlockingQueue`：** 可以有界，也可以无界。基于链表实现的阻塞队列。`newFixedThreadPool`线程池使用了这个队列。
+- **`SynchronousQueue`：** 没有容量，每一个插入操作都要等待一个相应的删除操作，反之，每一个删除操作都要等待对应的插入操作。如使用SynchronousQueue，提交的任务不会被真实的保存，而总是将新任务提交给线程执行，如果没有空闲的进程，则尝试创建新的进程，如果进程的数量已达到最大值，则执行拒绝策略。`newCachedThreadPool`的默认队列。
+- **`PriorityBlockingQueue`：** 一个支持优先级排序的无界阻塞队列。
+- **`DelayQueue`：** 一个使用优先级队列实现的无界阻塞队列，只有在延迟期满时才能从中提取元素。根据指定的执行时间从小到大排序，否则根据插入到队列的先后排序。`newScheduledThreadPool`线程池使用了这个队列。
 
 **`ThreadPoolExecutor` 饱和策略定义:**
 
 如果当前同时运行的线程数量达到最大线程数量并且队列也已经被放满了任务时，`ThreadPoolTaskExecutor` 定义一些策略:
 
-- **`ThreadPoolExecutor.AbortPolicy`**：抛出 `RejectedExecutionException`来拒绝新任务的处理。
-- **`ThreadPoolExecutor.CallerRunsPolicy`**：调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
+- **`ThreadPoolExecutor.AbortPolicy`：** 抛出 `RejectedExecutionException`来拒绝新任务的处理。
+- **`ThreadPoolExecutor.CallerRunsPolicy`：** 调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
 - **`ThreadPoolExecutor.DiscardPolicy`：** 不处理新任务，直接丢弃掉。
 - **`ThreadPoolExecutor.DiscardOldestPolicy`：** 此策略将丢弃最早的未处理的任务请求。
 
