@@ -593,11 +593,88 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 3. **如果执行 `ExecutorService.submit（…）`，`ExecutorService` 将返回一个实现`Future`接口的对象**（我们刚刚也提到过了执行 `execute()`方法和 `submit()`方法的区别，`submit()`会返回一个 `FutureTask 对象）。由于 FutureTask` 实现了 `Runnable`，我们也可以创建 `FutureTask`，然后直接交给 `ExecutorService` 执行。
 4. **最后，主线程可以执行 `FutureTask.get()`方法来等待任务执行完成。主线程也可以执行 `FutureTask.cancel（boolean mayInterruptIfRunning）`来取消此任务的执行。**
 
+`Executors`是一个线程池工厂，提供了很多的工厂方法，我们来看看它大概能创建哪些线程池。
+```java
+// 创建单一线程的线程池
+public static ExecutorService newSingleThreadExecutor();
+// 创建固定数量的线程池
+public static ExecutorService newFixedThreadPool(int nThreads);
+// 创建带缓存的线程池
+public static ExecutorService newCachedThreadPool();
+// 创建定时调度的线程池
+public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize);
+// 创建流式（fork-join）线程池
+public static ExecutorService newWorkStealingPool();
+```
+
+`newSingleThreadExecutor`
+
+顾名思义，这个线程池只有一个线程。若多个任务被提交到此线程池，那么会被缓存到队列（队列长度为Integer.MAX_VALUE）。当线程空闲的时候，按照FIFO的方式进行处理。
+
+`newFixedThreadPool`
+
+和创建单一线程的线程池类似，只是这儿可以并行处理任务的线程数更多一些罢了。若多个任务被提交到此线程池，会有下面的处理过程。
+如果线程的数量未达到指定数量，则创建线程来执行任务
+
+如果线程池的数量达到了指定数量，并且有线程是空闲的，则取出空闲线程执行任务
+
+如果没有线程是空闲的，则将任务缓存到队列（队列长度为Integer.MAX_VALUE）。当线程空闲的时候，按照FIFO的方式进行处理
+
+`newCachedThreadPool`
+
+这种方式创建的线程池，核心线程池的长度为0，线程池最大长度为Integer.MAX_VALUE。由于本身使用SynchronousQueue作为等待队列的缘故，导致往队列里面每插入一个元素，必须等待另一个线程从这个队列删除一个元素。
+
+`newScheduledThreadPool`
+
+和上面3个工厂方法返回的线程池类型有所不同，它返回的是ScheduledThreadPoolExecutor类型的线程池。平时我们实现定时调度功能的时候，可能更多的是使用第三方类库，比如：quartz等。但是对于更底层的功能，我们仍然需要了解。
+
+我们写一个例子来看看如何使用。
+```java
+public class ThreadPoolTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+
+        // 定时调度，每个调度任务会至少等待`period`的时间，
+        // 如果任务执行的时间超过`period`，则等待的时间为任务执行的时间
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                Thread.sleep(10000);
+                System.out.println(System.currentTimeMillis() / 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        // 定时调度，第二个任务执行的时间 = 第一个任务执行时间 + `delay`
+        executor.scheduleWithFixedDelay(() -> {
+            try {
+                Thread.sleep(5000);
+                System.out.println(System.currentTimeMillis() / 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        // 定时调度，延迟`delay`后执行，且只执行一次
+        executor.schedule(() -> System.out.println("5 秒之后执行 schedule"), 5, TimeUnit.SECONDS);
+    }
+}
+```
+`scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)`
+
+定时调度，每个调度任务会至少等待period的时间，如果任务执行的时间超过period，则等待的时间为任务执行的时间
+
+`scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)`
+
+定时调度，第二个任务执行的时间 = 第一个任务执行时间 + delay
+
+`schedule(Runnable command, long delay, TimeUnit unit)`
+
+定时调度，延迟delay后执行，且只执行一次
+
+
+
 ## 自带线程池
-
-
-
-
 ## ThreadPoolExecutor 类
 
 `ThreadPoolExecutor` 类中提供的四个构造方法。我们来看最长的那个，其余三个都是在这个构造方法的基础上产生（其他几个构造方法说白点都是给定某些默认参数的构造方法比如默认制定拒绝策略是什么），这里就不贴代码讲了，比较简单。
@@ -642,9 +719,16 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 
 1. **`keepAliveTime`**:当线程池中的线程数量大于 `corePoolSize` 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 `keepAliveTime`才会被回收销毁；
 2. **`unit`** : `keepAliveTime` 参数的时间单位。
-3. **`threadFactory`** :executor 创建新线程的时候会用到。
+3. **`threadFactory`** :executor 创建新线程的时候会用到。默及正常优先级、非守护线程。
 4. **`handler`** :饱和策略。关于饱和策略下面单独介绍一下。
 
+
+**`workQueue` 工作队列:**
+- **`ArrayBlockingQueue`**：用数组实现的有界阻塞队列，按FIFO排序。
+- **`LinkedBlockingQueue`**：可以有界，也可以无界。基于链表实现的阻塞队列。`newFixedThreadPool`线程池使用了这个队列。
+- **`SynchronousQueue`**：没有容量，每一个插入操作都要等待一个相应的删除操作，反之，每一个删除操作都要等待对应的插入操作。如使用SynchronousQueue，提交的任务不会被真实的保存，而总是将新任务提交给线程执行，如果没有空闲的进程，则尝试创建新的进程，如果进程的数量已达到最大值，则执行拒绝策略。`newCachedThreadPool`的默认队列。
+- **`PriorityBlockingQueue`**：一个支持优先级排序的无界阻塞队列。
+- **`DelayQueue`**：一个使用优先级队列实现的无界阻塞队列，只有在延迟期满时才能从中提取元素。根据指定的执行时间从小到大排序，否则根据插入到队列的先后排序。`newScheduledThreadPool`线程池使用了这个队列。
 
 **`ThreadPoolExecutor` 饱和策略定义:**
 
