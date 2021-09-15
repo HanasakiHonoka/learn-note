@@ -32,6 +32,7 @@ destroyed
 
 ### Vue组件通信
 父组件A通过props的方式向子组件B传递，B to A 通过在 B 组件中 $emit, A 组件中 v-on 的方式实现
+https://segmentfault.com/a/1190000019208626
 
 ### Vue双向绑定原理
 
@@ -136,9 +137,8 @@ console.log('push结束了');
 
 ## React
 
-它使用虚拟DOM而不是真实DOM。
-它使用服务器端渲染。
-它遵循单向数据流或数据绑定
+
+
 
 ### React的生命周期
 
