@@ -254,3 +254,19 @@ display:flex;
 |    flex: 1    |  flex: 1 1 0%  |     推荐     |
 |  flex: auto   | flex: 1 1 auto |  适用场景少  |
 
+### defer和async的区别
+
+- defer：用于开启新的线程下载脚本文件，并使脚本在文档解析完成后执行。
+- async：用于异步下载脚本文件，下载完毕立即解释执行代码。
+
+关于defer我们需要注意下面几点：
+
+1. defer只适用于外联脚本，如果script标签没有指定src属性，只是内联脚本，不要使用defer；
+2. 如果有多个声明了defer的脚本，则会按顺序下载和执行 ；
+3. defer脚本会在DOMContentLoaded和load事件之前执行。
+
+关于async，也需要注意以下几点：
+
+1. 只适用于外联脚本，这一点和defer一致；
+2. 如果有多个声明了async的脚本，其下载和执行也是异步的，不能确保彼此的先后顺序；
+3. async会在load事件之前执行，但并不能确保与DOMContentLoaded的执行先后顺序 。

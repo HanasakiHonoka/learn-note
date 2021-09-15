@@ -16,9 +16,7 @@
 
 下图是 Java 内存区域，通过下图我们从 JVM 的角度来说一下线程和进程之间的关系。如果你对 Java 内存区域 (运行时数据区) 这部分知识不太了解的话可以阅读一下这篇文章：[《可能是把 Java 内存区域讲的最清楚的一篇文章》](https://github.com/Snailclimb/JavaGuide/blob/3965c02cc0f294b0bd3580df4868d5e396959e2e/Java%E7%9B%B8%E5%85%B3/%E5%8F%AF%E8%83%BD%E6%98%AF%E6%8A%8AJava%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E8%AE%B2%E7%9A%84%E6%9C%80%E6%B8%85%E6%A5%9A%E7%9A%84%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0.md "《可能是把 Java 内存区域讲的最清楚的一篇文章》")
 
-<div align="center">  
-<img src="https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-3/JVM运行时数据区域.png" width="600px"/>
-</div>
+[![4PhR7n.png](https://z3.ax1x.com/2021/09/13/4PhR7n.png)](https://imgtu.com/i/4PhR7n)
 
 从上图可以看出：一个进程中可以有多个线程，多个线程共享进程的**堆**和**方法区 (JDK1.8 之后的元空间)**资源，但是每个线程有自己的**程序计数器**、**虚拟机栈** 和 **本地方法栈**。
 
@@ -69,11 +67,11 @@
 
 Java 线程在运行的生命周期中的指定时刻只可能处于下面 6 种不同状态的其中一个状态（图源《Java 并发编程艺术》4.1.4 节）。
 
-![Java 线程的状态 ](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/19-1-29/Java%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81.png)
+[![4PhIpT.png](https://z3.ax1x.com/2021/09/13/4PhIpT.png)](https://imgtu.com/i/4PhIpT)
 
 线程在生命周期中并不是固定处于某一个状态而是随着代码的执行在不同状态之间切换。Java 线程状态变迁如下图所示（图源《Java 并发编程艺术》4.1.4 节）：
 
-![Java 线程状态变迁 ](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/19-1-29/Java+%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%8F%98%E8%BF%81.png)
+[![4Ph7X4.png](https://z3.ax1x.com/2021/09/13/4Ph7X4.png)](https://imgtu.com/i/4Ph7X4)
 
 > 订正(来自[issue736](https://github.com/Snailclimb/JavaGuide/issues/736))：原图中 wait到 runnable状态的转换中，`join`实际上是`Thread`类的方法，但这里写成了`Object`。
 
@@ -81,7 +79,7 @@ Java 线程在运行的生命周期中的指定时刻只可能处于下面 6 种
 
 > 操作系统隐藏 Java 虚拟机（JVM）中的 READY 和 RUNNING 状态，它只能看到 RUNNABLE 状态（图源：[HowToDoInJava](https://howtodoinjava.com/ "HowToDoInJava")：[Java Thread Life Cycle and Thread States](https://howtodoinjava.com/java/multi-threading/java-thread-life-cycle-and-thread-states/ "Java Thread Life Cycle and Thread States")），所以 Java 系统一般将这两个状态统称为 **RUNNABLE（运行中）** 状态 。
 
-![RUNNABLE-VS-RUNNING](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-3/RUNNABLE-VS-RUNNING.png)
+[![4Phjtx.png](https://z3.ax1x.com/2021/09/13/4Phjtx.png)](https://imgtu.com/i/4Phjtx)
 
 当线程执行 `wait()`方法之后，线程进入 **WAITING（等待）** 状态。进入等待状态的线程需要依靠其他线程的通知才能够返回到运行状态，而 **TIME_WAITING(超时等待)** 状态相当于在等待状态的基础上增加了超时限制，比如通过 `sleep（long millis）`方法或 `wait（long millis）`方法可以将 Java 线程置于 TIMED WAITING 状态。当超时时间到达后 Java 线程将会返回到 RUNNABLE 状态。当线程调用同步方法时，在没有获取到锁的情况下，线程将会进入到 **BLOCKED（阻塞）** 状态。线程在执行 Runnable 的`run()`方法之后将会进入到 **TERMINATED（终止）** 状态。
 
@@ -102,7 +100,7 @@ Linux 相比与其他操作系统（包括其他类 Unix 系统）有很多的�
 
 如下图所示，线程 A 持有资源 2，线程 B 持有资源 1，他们同时都想申请对方的资源，所以这两个线程就会互相等待而进入死锁状态。
 
-![线程死锁示意图 ](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-4/2019-4%E6%AD%BB%E9%94%811.png)
+[![4P4S1O.png](https://z3.ax1x.com/2021/09/13/4P4S1O.png)](https://imgtu.com/i/4P4S1O)
 
 学过操作系统的朋友都知道产生死锁必须具备以下四个条件：
 
@@ -593,11 +591,88 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 3. **如果执行 `ExecutorService.submit（…）`，`ExecutorService` 将返回一个实现`Future`接口的对象**（我们刚刚也提到过了执行 `execute()`方法和 `submit()`方法的区别，`submit()`会返回一个 `FutureTask 对象）。由于 FutureTask` 实现了 `Runnable`，我们也可以创建 `FutureTask`，然后直接交给 `ExecutorService` 执行。
 4. **最后，主线程可以执行 `FutureTask.get()`方法来等待任务执行完成。主线程也可以执行 `FutureTask.cancel（boolean mayInterruptIfRunning）`来取消此任务的执行。**
 
+`Executors`是一个线程池工厂，提供了很多的工厂方法，我们来看看它大概能创建哪些线程池。
+```java
+// 创建单一线程的线程池
+public static ExecutorService newSingleThreadExecutor();
+// 创建固定数量的线程池
+public static ExecutorService newFixedThreadPool(int nThreads);
+// 创建带缓存的线程池
+public static ExecutorService newCachedThreadPool();
+// 创建定时调度的线程池
+public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize);
+// 创建流式（fork-join）线程池
+public static ExecutorService newWorkStealingPool();
+```
+
+`newSingleThreadExecutor`
+
+顾名思义，这个线程池只有一个线程。若多个任务被提交到此线程池，那么会被缓存到队列（队列长度为Integer.MAX_VALUE）。当线程空闲的时候，按照FIFO的方式进行处理。
+
+`newFixedThreadPool`
+
+和创建单一线程的线程池类似，只是这儿可以并行处理任务的线程数更多一些罢了。若多个任务被提交到此线程池，会有下面的处理过程。
+如果线程的数量未达到指定数量，则创建线程来执行任务
+
+如果线程池的数量达到了指定数量，并且有线程是空闲的，则取出空闲线程执行任务
+
+如果没有线程是空闲的，则将任务缓存到队列（队列长度为Integer.MAX_VALUE）。当线程空闲的时候，按照FIFO的方式进行处理
+
+`newCachedThreadPool`
+
+这种方式创建的线程池，核心线程池的长度为0，线程池最大长度为Integer.MAX_VALUE。由于本身使用SynchronousQueue作为等待队列的缘故，导致往队列里面每插入一个元素，必须等待另一个线程从这个队列删除一个元素。
+
+`newScheduledThreadPool`
+
+和上面3个工厂方法返回的线程池类型有所不同，它返回的是ScheduledThreadPoolExecutor类型的线程池。平时我们实现定时调度功能的时候，可能更多的是使用第三方类库，比如：quartz等。但是对于更底层的功能，我们仍然需要了解。
+
+我们写一个例子来看看如何使用。
+```java
+public class ThreadPoolTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+
+        // 定时调度，每个调度任务会至少等待`period`的时间，
+        // 如果任务执行的时间超过`period`，则等待的时间为任务执行的时间
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                Thread.sleep(10000);
+                System.out.println(System.currentTimeMillis() / 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        // 定时调度，第二个任务执行的时间 = 第一个任务执行时间 + `delay`
+        executor.scheduleWithFixedDelay(() -> {
+            try {
+                Thread.sleep(5000);
+                System.out.println(System.currentTimeMillis() / 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        // 定时调度，延迟`delay`后执行，且只执行一次
+        executor.schedule(() -> System.out.println("5 秒之后执行 schedule"), 5, TimeUnit.SECONDS);
+    }
+}
+```
+`scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)`
+
+定时调度，每个调度任务会至少等待period的时间，如果任务执行的时间超过period，则等待的时间为任务执行的时间
+
+`scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)`
+
+定时调度，第二个任务执行的时间 = 第一个任务执行时间 + delay
+
+`schedule(Runnable command, long delay, TimeUnit unit)`
+
+定时调度，延迟delay后执行，且只执行一次
+
+
+
 ## 自带线程池
-
-
-
-
 ## ThreadPoolExecutor 类
 
 `ThreadPoolExecutor` 类中提供的四个构造方法。我们来看最长的那个，其余三个都是在这个构造方法的基础上产生（其他几个构造方法说白点都是给定某些默认参数的构造方法比如默认制定拒绝策略是什么），这里就不贴代码讲了，比较简单。
@@ -642,16 +717,23 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 
 1. **`keepAliveTime`**:当线程池中的线程数量大于 `corePoolSize` 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 `keepAliveTime`才会被回收销毁；
 2. **`unit`** : `keepAliveTime` 参数的时间单位。
-3. **`threadFactory`** :executor 创建新线程的时候会用到。
+3. **`threadFactory`** :executor 创建新线程的时候会用到。默及正常优先级、非守护线程。
 4. **`handler`** :饱和策略。关于饱和策略下面单独介绍一下。
 
+
+**`workQueue` 工作队列:**
+- **`ArrayBlockingQueue`：** 用数组实现的有界阻塞队列，按FIFO排序。
+- **`LinkedBlockingQueue`：** 可以有界，也可以无界。基于链表实现的阻塞队列。`newFixedThreadPool`线程池使用了这个队列。
+- **`SynchronousQueue`：** 没有容量，每一个插入操作都要等待一个相应的删除操作，反之，每一个删除操作都要等待对应的插入操作。如使用SynchronousQueue，提交的任务不会被真实的保存，而总是将新任务提交给线程执行，如果没有空闲的进程，则尝试创建新的进程，如果进程的数量已达到最大值，则执行拒绝策略。`newCachedThreadPool`的默认队列。
+- **`PriorityBlockingQueue`：** 一个支持优先级排序的无界阻塞队列。
+- **`DelayQueue`：** 一个使用优先级队列实现的无界阻塞队列，只有在延迟期满时才能从中提取元素。根据指定的执行时间从小到大排序，否则根据插入到队列的先后排序。`newScheduledThreadPool`线程池使用了这个队列。
 
 **`ThreadPoolExecutor` 饱和策略定义:**
 
 如果当前同时运行的线程数量达到最大线程数量并且队列也已经被放满了任务时，`ThreadPoolTaskExecutor` 定义一些策略:
 
-- **`ThreadPoolExecutor.AbortPolicy`**：抛出 `RejectedExecutionException`来拒绝新任务的处理。
-- **`ThreadPoolExecutor.CallerRunsPolicy`**：调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
+- **`ThreadPoolExecutor.AbortPolicy`：** 抛出 `RejectedExecutionException`来拒绝新任务的处理。
+- **`ThreadPoolExecutor.CallerRunsPolicy`：** 调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
 - **`ThreadPoolExecutor.DiscardPolicy`：** 不处理新任务，直接丢弃掉。
 - **`ThreadPoolExecutor.DiscardOldestPolicy`：** 此策略将丢弃最早的未处理的任务请求。
 
@@ -1437,3 +1519,223 @@ threadnum:7is finish
 ## ReentrantLock 和 ReentrantReadWriteLock
 
 ReentrantLock 和 synchronized 的区别在上面已经讲过了这里就不多做讲解。另外，需要注意的是：读写锁 ReentrantReadWriteLock 可以保证多个线程可以同时读，所以在读操作远大于写操作的时候，读写锁就非常有用了。
+
+
+
+# 双线程分奇偶打印1-100
+## 使用volatile修饰的flag作为标志位
+```java
+public class ThreadTest {
+	volatile int flag=0;
+	public void runThread() throws InterruptedException{
+ 	   Thread t1=new Thread(new Thread1());
+ 	   Thread t2=new Thread(new Thread2());
+ 	   t1.start();
+ 	   t2.start();
+	}
+	public class Thread1 implements Runnable{
+		public void run() {
+			int i=0;
+			while(i<=99){
+				if(flag==0)
+				{
+					System.out.println("t1="+i+"flag="+flag);
+					i+=2;
+					flag=1;
+				}
+			}
+		}
+		
+	}
+	
+	public class Thread2 implements Runnable{
+		public void run() {
+			int i=1;
+			while(i<=99){
+				if(flag==1)
+				{
+					System.out.println("t2="+i+"flag="+flag);
+					i+=2;
+					flag=0;
+				}
+			}
+		}
+		
+	}
+}
+```
+
+## 内置锁
+- 同步：synchronized
+- 协作：Object # wait/notify/notifyAll
+```java
+public class PrintNumber {
+ 
+    /**
+     * 打印锁，同一时刻仅有一个任务可以持有此锁
+     */
+    private static Object lock = new Object();
+ 
+    /**
+     * 计数器
+     */
+    private static int counter = 1;
+ 
+    /**
+     * 计数器最大值
+     */
+    private static final int MAX_COUNTER = 100;
+ 
+    public static void main(String args[]) {
+        // 奇数打印线程
+        Thread oddThread = new Thread() {
+            @Override
+            public void run() {
+                // 请求打印锁
+                synchronized (lock) {
+                    while (counter <= MAX_COUNTER) {
+                        // counter为奇数，打印counter并唤醒偶数打印线程
+                        if (counter % 2 != 0) {
+                            System.out.println("Thread1 : " + counter);
+                            counter = counter + 1;
+                            lock.notifyAll();
+                        }
+                        // counter为偶数，挂起并等待偶数打印线程唤醒
+                        else {
+                            try {
+                                lock.wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+ 
+        // 偶数打印线程
+        Thread evenThread = new Thread() {
+            @Override
+            public void run() {
+                // 请求打印锁
+                synchronized (lock) {
+                    while (counter <= MAX_COUNTER) {
+                        // counter为偶数，打印counter并唤醒奇数打印线程
+                        if (counter % 2 == 0) {
+                            System.out.println("Thread2 : " + counter);
+                            counter = counter + 1;
+                            lock.notifyAll();
+                        }
+                        // counter为奇数，挂起并等待奇数打印线程唤醒
+                        else {
+                            try {
+                                lock.wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+ 
+ 
+        oddThread.start();
+        evenThread.start();
+    }
+ 
+}
+```
+
+## 显式锁
+- 同步：lock/unlock
+- 协作：Condition # await/signal/signalAll
+```java
+public class PrintNumber {
+ 
+    /**
+     * 打印锁，同一时刻仅有一个任务可以持有此锁
+     */
+    private static Lock lock = new ReentrantLock();
+ 
+    private static Condition oddCondition = lock.newCondition();
+ 
+    private static Condition evenCondition = lock.newCondition();
+ 
+    /**
+     * 计数器
+     */
+    private static int counter = 1;
+ 
+    /**
+     * 计数器最大值
+     */
+    private static final int MAX_COUNTER = 100;
+ 
+    public static void main(String args[]) {
+        // 奇数打印线程
+        Thread oddThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    // 请求打印锁
+                    lock.lock();
+                    while (counter <= MAX_COUNTER) {
+                        // counter为奇数，打印counter并唤醒偶数打印线程
+                        if (counter % 2 != 0) {
+                            System.out.println("Thread1 : " + counter);
+                            counter = counter + 1;
+                            evenCondition.signalAll();
+                        }
+                        // counter为偶数，挂起并等待偶数打印线程唤醒
+                        else {
+                            try {
+                                oddCondition.await();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } finally {
+                    // 释放打印锁
+                    lock.unlock();
+                }
+            }
+        };
+ 
+        // 偶数打印线程
+        Thread evenThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    // 请求打印锁
+                    lock.lock();
+                    while (counter <= MAX_COUNTER) {
+                        // counter为偶数，打印counter并唤醒奇数打印线程
+                        if (counter % 2 == 0) {
+                            System.out.println("Thread2 : " + counter);
+                            counter = counter + 1;
+                            oddCondition.signalAll();
+                        }
+                        // counter为奇数，挂起并等待奇数打印线程唤醒
+                        else {
+                            try {
+                                evenCondition.await();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } finally {
+                    // 释放打印锁
+                    lock.unlock();
+                }
+            }
+        };
+ 
+        oddThread.start();
+        evenThread.start();
+    }
+ 
+}
+```

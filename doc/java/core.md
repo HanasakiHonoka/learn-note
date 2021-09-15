@@ -255,6 +255,7 @@ try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(new F
 >该状态是指线程刚创建，尚未启动。
 
 2. RUNNABLE
+
 >表示线程正在正常运行中，当然可能会有某种耗时计算/IO等待的操作/CPU时间片切换等，这个状态下发生的等待一般是其他系统资源，而不是锁、Sleep等。
 
 3. BLOCKED
@@ -331,7 +332,7 @@ Java Io 流共涉及 40 多个类，这些类看上去很杂乱，但实际上�
 
 BIO通信（一请求一应答）模型图如下(图源网络，原出处不明)：
 
-![传统BIO通信模型图](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2.png)
+[![4p4fQH.png](https://z3.ax1x.com/2021/09/12/4p4fQH.png)](https://imgtu.com/i/4p4fQH)
 
 采用 **BIO 通信模型** 的服务端，通常由一个独立的 Acceptor 线程负责监听客户端的连接。我们一般通过在`while(true)` 循环中服务端会调用 `accept()` 方法等待接收客户端的连接的方式监听请求，请求一旦接收到一个连接请求，就可以建立通信套接字在这个通信套接字上进行读写操作，此时不能再接收其他客户端连接请求，只能等待同当前连接的客户端的操作执行完成， 不过可以通过多线程来支持多个客户端的连接，如上图所示。
 
@@ -347,7 +348,7 @@ BIO通信（一请求一应答）模型图如下(图源网络，原出处不明)
 
 伪异步IO模型图(图源网络，原出处不明)：
 
-![伪异步IO模型图](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/3.png)
+[![4p5pT0.png](https://z3.ax1x.com/2021/09/12/4p5pT0.png)](https://imgtu.com/i/4p5pT0)
 
 采用线程池和任务队列可以实现一种叫做伪异步的 I/O 通信框架，它的模型图如上图所示。当有新的客户端接入时，将客户端的 Socket 封装成一个Task（该任务实现java.lang.Runnable接口）投递到后端的线程池中进行处理，JDK 的线程池维护一个消息队列和 N 个活跃线程，对消息队列中的任务进行处理。由于线程池可以设置消息队列的大小和最大线程数，因此，它的资源占用是可控的，无论多少个客户端并发访问，都不会导致资源的耗尽和宕机。
 
@@ -485,7 +486,7 @@ NIO有选择器，而IO没有。
 
 选择器用于使用单个线程处理多个通道。因此，它需要较少的线程来处理这些通道。线程之间的切换对于操作系统来说是昂贵的。 因此，为了提高系统效率选择器是有用的。
 
-![一个单线程中Selector维护3个Channel的示意图](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-2/Slector.png)
+[![4p5kpF.png](https://z3.ax1x.com/2021/09/12/4p5kpF.png)](https://imgtu.com/i/4p5kpF)
 
 ## 2.3  NIO 读数据和写数据方式
 

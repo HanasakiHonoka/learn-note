@@ -226,7 +226,7 @@ function ajax(url) {
     	}else reject();
   	} 
   	xhr.onreadystatechange = function() {
-    	if(xhr.status==200&&shr.readyState==4) {
+    	if(xhr.status==200&&xhr.readyState==4) {
       	resolve();
     	}
   	}
@@ -724,3 +724,69 @@ var a={
 1）由于闭包会使得函数中的变量都被保存在内存中，内存消耗很大，所以不能滥用闭包，否则会造成网页的性能问题，在IE中可能导致内存泄露。解决方法是，在退出函数之前，将不使用的局部变量全部删除。
 
 2）闭包会在父函数外部，改变父函数内部变量的值。所以，如果你把父函数当作对象（object）使用，把闭包当作它的公用方法（Public Method），把内部变量当作它的私有属性（private value），这时一定要小心，不要随便改变父函数内部变量的值。
+
+
+
+### 数组扁平化
+
+**需求**:多维数组=>一维数组
+
+```js
+let ary = [1, [2, [3, [4, 5]]], 6];
+let str = JSON.stringify(ary);
+```
+
+**第0种处理:直接的调用**
+
+```js
+arr_flat = arr.flat(Infinity);
+```
+
+**第一种处理**
+
+```js
+ary = str.replace(/[\[\]]/g, '').split(',');
+```
+
+**第二种处理**
+
+```js
+str = str.replace(/[\[\]]/g, '');
+str = '[' + str + ']';
+ary = JSON.parse(str);
+```
+
+**第三种处理：递归处理**
+
+```js
+let result = [];
+let fn = function (ary) {
+  for (let i = 0; i < ary.length; i++) {
+    let item = ary[i];
+    if (Array.isArray(item)) {
+      fn(item);
+    } else {
+      result.push(item);
+    }
+  }
+}
+fn(ary);
+```
+
+**第四种处理：用 reduce 实现数组的 flat 方法**
+
+```js
+function flatten(ary) {
+  return ary.reduce((pre, cur) => {
+    return pre.concat(Array.isArray(cur) ? flatten(cur) : cur);
+  }, [])
+}
+```
+
+**第五种处理：扩展运算符**
+
+```js
+while (ary.some(Array.isArray)) {
+  ary = [].concat(...ary);
+}
+```
