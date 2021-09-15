@@ -27,6 +27,7 @@
 3. **根据对象的class属性(类属性)，跨原型链调用toString()方法。**
 
 js中提供了调用对象原型中的toString方法， Object.prototype.toString.call(obj)；因为很多对象继承的toString（）方法被重写了，为了能够调用正确的toString（）版本，也就是最原始的版本。可以使用Function.call()的方法，其中call可以这么理解，相当于obj去借用这个 Object.prototype.toString()。
+```Object.prototype.toString.call(o)=='[object Array]'```
 
 4. **Array.isArray()方法**
 

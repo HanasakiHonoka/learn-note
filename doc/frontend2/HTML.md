@@ -80,7 +80,55 @@ Cross-site request forgery,跨站请求伪造，简单来说就是盗用了你�
 - 若在缓存中找不到结果以及缓存标识，强制缓存失效,直接向服务器发起请求；
 - 存在结果和标识，但结果失效，触发协商缓存；
 - 存在结果和标识，结果未失效，触发强制缓存，直接返回结果
+通过header字段Expires和Cach-Control管理
+后者优先级更高。
+Expires: Wed, 21 Oct 2000 07:28:00 GMT
+Cache-Control: max-age=20000
+
+**协商缓存**
+Etag：  一个hash值或者版本号
+if-none-match： 若true，返回304 ； 若false 返回200
+
+Last-Modified/ if-modified-since
+
+Etag优先级更高 ， 后者1s级别的
 
 
+### `<script>`使用时机
+放在`<head>`内，只有当脚本全部下载解析并执行后才去解析`<body>`导致页面白屏。
 
 
+### POST Get区别
+1. 都能发送数据和接收数据，post通过报文，get通过地址栏
+2. get会由于url的长度而受限
+3. get发一个tcp包（包含header 和data）， post发俩。第一个（header）会返回100，然后发第二个data
+4. get安全性低于post，URL是可见的，可能会泄露私密信息； 数据查询用get；
+5. get只能支持ASCII字符，向服务器传的中文字符可能会乱码，post支持标准字符集，可以正确传递中文字符
+
+### 八种请求类型
+|||
+|  ----  | ----  | 
+|get ||
+post ||
+delete  |删除
+put     |更新实体
+trace   |提供一种方法来测试当一个请求发生的时候，服务器通过网络收到的内容。所以它会返回你发送的内容
+head    |HEAD请求和GET请求资源类似，但仅仅返回相应的头部，没有具体的响应体
+options |OPTIONS允许客户端请求一个服务所支持的请求方法。它所对应的响应头是Allow，它非常简洁地列出了支持的方法。
+connect |主要用来建立一个对资源的网络连接。一旦建立连接后，会响应一个200状态码和一条"Connectioin Established"的消息。
+
+**简单请求**
+只要同时满足以下两大条件，就属于简单请求。
+
+（1) 请求方法是以下三种方法之一：
+
+HEAD
+GET
+POST
+
+（2）HTTP的头信息不超出以下几种字段：
+Accept
+Accept-Language
+Content-Language
+Last-Event-ID
+Content-Type：只限于三个值application/x-www-form-urlencoded、multipart/form-data、text/plain

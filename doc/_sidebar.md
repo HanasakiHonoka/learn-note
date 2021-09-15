@@ -33,6 +33,7 @@
   * [HTML](frontend2/HTML)
   * [CSS](frontend2/CSS)
   * [JS](frontend2/JS)
+  * [项目](frontend2/项目)
 * [**LeetCode**](leetcode/)
   * [Hot100总结](leetcode/Hot100总结.md)
   * [常用模板](leetcode/template.md)
