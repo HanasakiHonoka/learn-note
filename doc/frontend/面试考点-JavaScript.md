@@ -225,7 +225,7 @@ function ajax(url) {
     	}else reject();
   	} 
   	xhr.onreadystatechange = function() {
-    	if(xhr.status==200&&shr.readyState==4) {
+    	if(xhr.status==200&&xhr.readyState==4) {
       	resolve();
     	}
   	}
