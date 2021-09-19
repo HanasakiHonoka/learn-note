@@ -16,6 +16,7 @@
   * [Spring](framework/spring)
   * [SpringMVC](framework/springmvc)
   * [Redis](framework/redis.md)
+  * [Redis常见面试题](framework/redisInterview.md)
   * [Nginx](framework/nginx.md)
   * [高可用](framework/高可用.md)
   * [消息队列](framework/消息队列.md)
