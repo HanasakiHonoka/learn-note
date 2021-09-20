@@ -569,6 +569,94 @@ function unique (arr) {
 
 
 
+### JS格式化数字（每3位加逗号）
+
+#### 方法一——拆分数组
+
+执行过程就是把数字转换成字符串后，打散为数组，再从末尾开始，逐个把数组中的元素插入到新数组（result）的开头。每插入一个元素，counter就计一次数（加1），当counter为3的倍数时，就插入一个逗号，但是要注意开头（i为0时）不需要逗号。最后通过调用新数组的join方法得出结果。
+
+```js
+// 方法一
+function toThousands(num) {
+    var result = [],
+        counter = 0;
+    num = (num || 0).toString().split('');
+    for (var i = num.length - 1; i >= 0; i--) {
+        counter++;
+        result.unshift(num[i]);
+        if (!(counter % 3) && i != 0) {
+            result.unshift(',');
+        }
+    }
+    return result.join('');
+}
+```
+
+#### 方法二——方法一的字符串版
+
+方法二是方法一的改良版，不把字符串打散为数组，始终对字符串操作。
+
+```js
+// 方法二
+function toThousands(num) {
+    var result = '',
+        counter = 0;
+    num = (num || 0).toString();
+    for (var i = num.length - 1; i >= 0; i--) {
+        counter++;
+        result = num.charAt(i) + result;
+        if (!(counter % 3) && i != 0) {
+            result = ',' + result;
+        }
+    }
+    return result;
+}
+```
+
+#### 方法三——循环匹配末尾的三个数字
+
+如果数字的位数是3的倍数时，最后一次匹配到的内容肯定是三个数字，但是最前面的三个数字前不需要加逗号；
+如果数字的位数不是3的倍数，那num变量最后肯定会剩下1到2个数字，循环过后，要把剩余的数字插入到结果字符串的开头。
+
+```js
+// 方法三
+function toThousands(num) {
+    var num = (num || 0).toString(),
+        result = '';
+    while (num.length > 3) {
+        result = ',' + num.slice(-3) + result;
+        num = num.slice(0, num.length - 3);
+    }
+    if (num) {
+        result = num + result;
+    }
+    return result;
+}
+```
+
+#### 方法四——分组合并法
+
+先把数字的位数补足为3的倍数，通过正则表达式，将其切割成每三个数字一个分组，再通过join方法添加逗号，最后还要把补的0移除。
+
+```js
+// 方法四
+function toThousands(num) {
+    var num = (num || 0).toString(),
+        temp = num.length % 3;
+    switch (temp) {
+        case 1:
+            num = '00' + num;
+            break;
+        case 2:
+            num = '0' + num;
+            break;
+    }
+    return num.match(/\d{3}/g).join(',').replace(/^0+/, '');
+}
+```
+
+
+
 ### JS显示转换与隐式转换
 
 #### **显示转换**
