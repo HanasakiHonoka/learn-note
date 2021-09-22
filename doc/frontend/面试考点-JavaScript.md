@@ -1,3 +1,5 @@
+
+
 ### 基本数据类型和引用数据类型
 
 基本类型：Number、String 、Boolean、Null、Undefined和Symbol
@@ -382,6 +384,28 @@ function bigNumAdd(a, b) {
 5. 寄生式继承：**核心：**对原型式继承的二次封装，添加了自己的属性和方法。
 6. 寄生组合继承：**核心：**通过寄生方式，砍掉父类的实例属性，这样，在调用两次父类的构造的时候，就不会初始化两次实例方法/属性，避免的组合继承的缺点 **优点**： 这种方式的高效率体现它只调用了一次 Parent 构造函数，并且因此避免了在 Parent.prototype 上面创建不必要的、多余的属性。与此同时，原型链还能保持不变；因此，还能够正常使用 instanceof 和 isPrototypeOf。开发人员普遍认为寄生组合式继承是引用类型最理想的继承范式。
 
+### 手写Object.create
+
+```js
+function create(proto, propertiesObject = undefined) { 
+  // proto 新创建对象的原型对象, propertiesObject 要定义其可枚举属性或修改的属性描述符的对象
+    if (typeof proto !== 'object' && proto !== null && typeof proto === 'function') 
+      // 只能是 null 或者 object
+        throw Error('Uncaught TypeError: Object prototype may only be an Object or null');
+
+    function F() {} // 创建一个空的构造函数 F
+    F.prototype = proto; // F 原型指向 proto
+    let obj = new F(); // 创建 F 的实例
+
+    if (propertiesObject !== undefined) // propertiesObject有值则调用 Object.defineProperties
+        Object.defineProperties(obj, propertiesObject);
+
+    return obj; // 返回 这个 obj
+}
+```
+
+
+
 ### 箭头函数的特点
 
 - **箭头函数表达式**的语法比[函数表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/function)更简洁，并且没有自己的[this](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this)，[arguments](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/arguments)，[super](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super)或[new.target](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new.target)。箭头函数表达式更适用于那些本来需要匿名函数的地方，并且它不能用作构造函数。
@@ -562,6 +586,94 @@ console.log(unique(array)); // [1, 2, "1"]
 function unique (arr) {
     const seen = new Map()
     return arr.filter((a) => !seen.has(a) && seen.set(a, 1))
+}
+```
+
+
+
+### JS格式化数字（每3位加逗号）
+
+#### 方法一——拆分数组
+
+执行过程就是把数字转换成字符串后，打散为数组，再从末尾开始，逐个把数组中的元素插入到新数组（result）的开头。每插入一个元素，counter就计一次数（加1），当counter为3的倍数时，就插入一个逗号，但是要注意开头（i为0时）不需要逗号。最后通过调用新数组的join方法得出结果。
+
+```js
+// 方法一
+function toThousands(num) {
+    var result = [],
+        counter = 0;
+    num = (num || 0).toString().split('');
+    for (var i = num.length - 1; i >= 0; i--) {
+        counter++;
+        result.unshift(num[i]);
+        if (!(counter % 3) && i != 0) {
+            result.unshift(',');
+        }
+    }
+    return result.join('');
+}
+```
+
+#### 方法二——方法一的字符串版
+
+方法二是方法一的改良版，不把字符串打散为数组，始终对字符串操作。
+
+```js
+// 方法二
+function toThousands(num) {
+    var result = '',
+        counter = 0;
+    num = (num || 0).toString();
+    for (var i = num.length - 1; i >= 0; i--) {
+        counter++;
+        result = num.charAt(i) + result;
+        if (!(counter % 3) && i != 0) {
+            result = ',' + result;
+        }
+    }
+    return result;
+}
+```
+
+#### 方法三——循环匹配末尾的三个数字
+
+如果数字的位数是3的倍数时，最后一次匹配到的内容肯定是三个数字，但是最前面的三个数字前不需要加逗号；
+如果数字的位数不是3的倍数，那num变量最后肯定会剩下1到2个数字，循环过后，要把剩余的数字插入到结果字符串的开头。
+
+```js
+// 方法三
+function toThousands(num) {
+    var num = (num || 0).toString(),
+        result = '';
+    while (num.length > 3) {
+        result = ',' + num.slice(-3) + result;
+        num = num.slice(0, num.length - 3);
+    }
+    if (num) {
+        result = num + result;
+    }
+    return result;
+}
+```
+
+#### 方法四——分组合并法
+
+先把数字的位数补足为3的倍数，通过正则表达式，将其切割成每三个数字一个分组，再通过join方法添加逗号，最后还要把补的0移除。
+
+```js
+// 方法四
+function toThousands(num) {
+    var num = (num || 0).toString(),
+        temp = num.length % 3;
+    switch (temp) {
+        case 1:
+            num = '00' + num;
+            break;
+        case 2:
+            num = '0' + num;
+            break;
+    }
+    return num.match(/\d{3}/g).join(',').replace(/^0+/, '');
 }
 ```
 
@@ -790,3 +902,28 @@ while (ary.some(Array.isArray)) {
   ary = [].concat(...ary);
 }
 ```
+
+### ES6 Symbol
+
+ES6 引入了一种新的原始数据类型 Symbol ，表示独一无二的值，最大的用法是用来定义对象的唯一属性名。
+
+Symbol 函数栈不能用 new 命令，因为 Symbol 是原始数据类型，不是对象。可以接受一个字符串作为参数，为新创建的 Symbol 提供描述，用来显示在控制台或者作为字符串的时候使用，便于区分。
+
+#### 使用场景
+
+#####  作为属性名
+
+**用法**
+
+由于每一个 Symbol 的值都是不相等的，所以 Symbol 作为对象的属性名，可以保证属性不重名。
+**注意点** 
+
+Symbol 值作为属性名时，该属性是公有属性不是私有属性，可以在类的外部访问。但是不会出现在 for...in 、 for...of 的循环中，也不会被 Object.keys() 、 Object.getOwnPropertyNames() 返回。如果要读取到一个对象的 Symbol 属性，可以通过 Object.getOwnPropertySymbols() 和 Reflect.ownKeys() 取到。
+
+##### 定义常量
+
+Symbol.for()
+Symbol.for() 类似单例模式，首先会在全局搜索被登记的 Symbol 中是否有该字符串参数作为名称的 Symbol 值，如果有即返回该 Symbol 值，若没有则新建并返回一个以该字符串参数为名称的 Symbol 值，并登记在全局环境中供搜索。
+
+Symbol.keyFor()
+Symbol.keyFor() 返回一个已登记的 Symbol 类型值的 key ，用来检测该字符串参数作为名称的 Symbol 值是否已被登记。

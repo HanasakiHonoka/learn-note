@@ -51,34 +51,46 @@ BFC 即 Block Formatting Contexts (块级格式化上下文)，**具有 BFC 特�
 ```css
 display:flex;
 
+// 决定主轴的方向（即项目的排列方向）。
 flex-direction:row（默认值） | row-reverse | column |column-reverse
 
+// 默认情况下，项目都排在一条线（又称"轴线"）上。flex-wrap属性定义，如果一条轴线排不下，如何换行。
 flex-wrap:nowrap（默认值） | wrap | wrap-reverse
 
-justify-content:flex-start（默认值） | flex-end | center |space-between | space-around | space-evenly
+// 定义了项目在主轴上的对齐方式。
+justify-content:flex-start（默认值） | flex-end | center |space-between(两端对齐，项目之间的间隔都相等。) | space-around (每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍)| space-evenly
 
+// 定义项目在交叉轴上如何对齐。
 align-items:stretch（默认值） | center  | flex-end | baseline | flex-start
 
+// 定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用
 align-content:stretch（默认值） | flex-start | center |flex-end | space-between | space-around | space-evenly
 ```
 
 #### 设置项目的属性有：
 
 ```css
+// 定义项目的排列顺序。数值越小，排列越靠前，默认为0。
 order:0（默认值） | <integer>
 
+// 定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大。
 flex-shrink:1（默认值） | <number>
 
+// 定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。
 flex-grow:0（默认值） | <number>
 
+// 定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。有width默认width，都有basis>width
 flex-basis:auto（默认值） | <length>
 
 flex:none | auto | @flex-grow @flex-shrink @flex-basis
-
+  
+// 允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
 align-self:auto（默认值） | flex-start | flex-end |center | baseline| stretch
 ```
 
 #### flex-shink的计算方式
+
+有width默认width，都有basis>width
 
 一个宽度为400px的容器，里面的三个项目width分别为120px，150px，180px。分别对这项目1和项目2设置flex-shrink值为2和3。
 
@@ -103,6 +115,16 @@ item3的最终宽度为：180 - 50 * 180 * 1 / 870 ≈ 169px
 其中计算时候值如果为小数，则向下取整。
 
 
+
+|   单值语法    |     等同于     |     备注     |
+| :-----------: | :------------: | :----------: |
+| flex: initial | flex: 0 1 auto | 初始值，常用 |
+|    flex: 0    |  flex: 0 1 0%  |  适用场景少  |
+|  flex: none   | flex: 0 0 auto |     推荐     |
+|    flex: 1    |  flex: 1 1 0%  |     推荐     |
+|  flex: auto   | flex: 1 1 auto |  适用场景少  |
+
+### 
 
 ### 实现盒子垂直居中的方式
 
@@ -246,14 +268,6 @@ display:flex;
     </div>
 ```
 
-|   单值语法    |     等同于     |     备注     |
-| :-----------: | :------------: | :----------: |
-| flex: initial | flex: 0 1 auto | 初始值，常用 |
-|    flex: 0    |  flex: 0 1 0%  |  适用场景少  |
-|  flex: none   | flex: 0 0 auto |     推荐     |
-|    flex: 1    |  flex: 1 1 0%  |     推荐     |
-|  flex: auto   | flex: 1 1 auto |  适用场景少  |
-
 ### defer和async的区别
 
 - defer：用于开启新的线程下载脚本文件，并使脚本在文档解析完成后执行。
@@ -270,3 +284,32 @@ display:flex;
 1. 只适用于外联脚本，这一点和defer一致；
 2. 如果有多个声明了async的脚本，其下载和执行也是异步的，不能确保彼此的先后顺序；
 3. async会在load事件之前执行，但并不能确保与DOMContentLoaded的执行先后顺序 。
+
+### z-index影响下的层级布局
+
+#### 定义：
+
+z-index 属性设置元素的堆叠顺序。拥有更高堆叠顺序的元素总是会处于堆叠顺序较低的元素的前面。（仅在节点的 position 属性为 relative, absolute 或者 fixed 时生效。）
+
+该属性设置一个定位元素沿 z 轴的位置，z 轴定义为垂直延伸到显示区的轴。如果为正数，则离用户更近，为负数则表示离用户更远。
+
+#### 基本规则：
+
+1. 不设置position 属性, 但为节点加上 z-index 属性. 发现 z-index 对节点没起作用。
+2. 设置了position属性（值不为static），对应的节点将脱离文本流，漂浮（覆盖）在其他节点上边。所以设置position属性能提升节点的显示等级。
+3. 如果所有节点都定义了相同的position，例如absolute。但没有设置z-index属性，节点将按出现的顺序依次覆盖前面节点重叠的部分，遵循“后来居上”原则。
+4. z-index 为 0 的节点与没有定义 z-index 在同一层级内没有高低之分; 但 z-index 大于等于 1 的节点会遮盖没有定义 z-index 的节点; z-index 的值为负数的节点将被没有定义 z-index 的节点覆盖。
+5. 子元素永远覆盖在父元素的上方。
+
+#### 从父规则：
+
+若是父节点都设置了一样的z-index值，则无论子节点设置何值，都只依照父节点的z-index值，根据上边所述的“基本规则”，完成节点之间的叠放。
+
+#### 默认值规则：
+
+若只是设置了position属性，而未设置z-index属性的话:
+
+* IE6、7以及IE8的混杂模式下，z-index的默认值是0，表示对应的节点将要加入到布局定位的层级元素的比较中去。
+* 在其他浏览器中的默认值为auto，不参与到层级元素的比较，其设置了z-index的子节点直接跳过“从父规则”加入到层级元素的比较。
+  
+
