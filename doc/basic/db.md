@@ -222,6 +222,7 @@ ALTER TABLE table ADD INDEX index_name (num,name,age)
 * where 子句里对索引列上有数学运算，用不上索引
 * where 子句里对有索引列使用函数，用不上索引
 * 如果mysql估计使用全表扫描要比使用索引快,则不使用索引
+> 没遵循最佳左前缀法则、范围查询的右边会失效、like以%开头查询用不到索引的原因https://cloud.tencent.com/developer/article/1704743
 
 ### 什么情况下不推荐使用索引
 

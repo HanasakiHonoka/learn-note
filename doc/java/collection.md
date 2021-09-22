@@ -426,6 +426,61 @@ static class Segment<K,V> extends ReentrantLock implements Serializable {
 
 `synchronized` 只锁定当前链表或红黑二叉树的首节点，这样只要 hash 不冲突，就不会产生并发，效率又提升 N 倍。
 
+### ConcurrentHashMap的size()方法
+在实际的项目过程中，我们通常需要获取集合类的长度， 那么计算 ConcurrentHashMap 的元素大小就是一个有趣的问题，因为他是并发操作的，就是在你计算 size 的时候，它还在并发的插入数据，可能会导致你计算出来的 size 和你实际的 size 有差距。
+
+#### 1.7
+JDK1.7中的ConcurrentHashMap的size方法，计算size的时候会先不加锁获取一次数据长度，然后再获取一次，最多三次。比较前后两次的值，如果相同的话说明不存在竞争的编辑操作，就直接把值返回就可以了。
+但是如果前后获取的值不一样，那么会将每个Segment都加上锁，然后计算ConcurrentHashMap的size值。
+
+#### 1.8
+JDK1.8 实现相比 JDK 1.7 简单很多，只有一种方案，我们直接看 size() 代码：
+```java
+public int size() {
+    long n = sumCount();
+    return ((n < 0L) ? 0 :
+           (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int)n);
+}
+```
+最大值是 Integer 类型的最大值，但是 Map 的 size 可能超过 MAX_VALUE， 所以还有一个方法 mappingCount()，JDK 的建议使用 mappingCount() 而不是size()。mappingCount() 的代码如下：
+```java
+public long mappingCount() {
+    long n = sumCount();
+    return (n < 0L) ? 0L : n; // ignore transient negative values
+}
+```
+以上可以看出，无论是 size() 还是 mappingCount(), 计算大小的核心方法都是 sumCount()。sumCount() 的代码如下:
+```java
+final long sumCount() {
+    CounterCell[] as = counterCells; CounterCell a;
+    long sum = baseCount;
+    if (as != null) {
+       for (int i = 0; i < as.length; ++i) {
+           if ((a = as[i]) != null)
+               sum += a.value;
+           }
+       }
+    return sum;
+}
+```
+分析一下 sumCount() 代码。ConcurrentHashMap 提供了 baseCount、counterCells 两个辅助变量和一个 CounterCell 辅助内部类。sumCount() 就是迭代 counterCells 来统计 sum 的过程。 put 操作时，肯定会影响 size()，在 put() 方法最后会调用 addCount() 方法。
+
+`addCount() `代码如下：
+
+如果 counterCells == null, 则对 baseCount 做 CAS 自增操作。
+![](https://pic4.zhimg.com/80/v2-8538ebf3422a0e6f6c6adf61a82d95db_720w.jpg)
+
+如果并发导致 baseCount CAS 失败了使用 counterCells。
+![](https://pic2.zhimg.com/80/v2-8bf123dc5e4bc4f64416a87b0707fcd5_720w.jpg)
+
+如果counterCells CAS 失败了，在 fullAddCount 方法中，会继续死循环操作，直到成功。
+
+![](https://pic1.zhimg.com/80/v2-cd7b6bcf019454f427a7d4dc13bde5c0_720w.jpg)
+
+然后，CounterCell 这个类到底是什么？我们会发现它使用了 @sun.misc.Contended 标记的类，内部包含一个 volatile 变量。@sun.misc.Contended 这个注解标识着这个类防止需要防止 "伪共享"。那么，什么又是伪共享呢？
+
+> 缓存系统中是以缓存行（cache line）为单位存储的。缓存行是2的整数幂个连续字节，一般为32-256个字节。最常见的缓存行大小是64个字节。当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，就会无意中影响彼此的性能，这就是伪共享。
+
 # List
 
 ## Arraylist 和 Vector 的区别?
