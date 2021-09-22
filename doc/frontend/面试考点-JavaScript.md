@@ -384,6 +384,28 @@ function bigNumAdd(a, b) {
 5. 寄生式继承：**核心：**对原型式继承的二次封装，添加了自己的属性和方法。
 6. 寄生组合继承：**核心：**通过寄生方式，砍掉父类的实例属性，这样，在调用两次父类的构造的时候，就不会初始化两次实例方法/属性，避免的组合继承的缺点 **优点**： 这种方式的高效率体现它只调用了一次 Parent 构造函数，并且因此避免了在 Parent.prototype 上面创建不必要的、多余的属性。与此同时，原型链还能保持不变；因此，还能够正常使用 instanceof 和 isPrototypeOf。开发人员普遍认为寄生组合式继承是引用类型最理想的继承范式。
 
+### 手写Object.create
+
+```js
+function create(proto, propertiesObject = undefined) { 
+  // proto 新创建对象的原型对象, propertiesObject 要定义其可枚举属性或修改的属性描述符的对象
+    if (typeof proto !== 'object' && proto !== null && typeof proto === 'function') 
+      // 只能是 null 或者 object
+        throw Error('Uncaught TypeError: Object prototype may only be an Object or null');
+
+    function F() {} // 创建一个空的构造函数 F
+    F.prototype = proto; // F 原型指向 proto
+    let obj = new F(); // 创建 F 的实例
+
+    if (propertiesObject !== undefined) // propertiesObject有值则调用 Object.defineProperties
+        Object.defineProperties(obj, propertiesObject);
+
+    return obj; // 返回 这个 obj
+}
+```
+
+
+
 ### 箭头函数的特点
 
 - **箭头函数表达式**的语法比[函数表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/function)更简洁，并且没有自己的[this](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this)，[arguments](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/arguments)，[super](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super)或[new.target](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new.target)。箭头函数表达式更适用于那些本来需要匿名函数的地方，并且它不能用作构造函数。
