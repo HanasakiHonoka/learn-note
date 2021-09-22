@@ -371,6 +371,23 @@ Serial Old 收集器
 
 ## G1 收集器
 
+在传统的GC收集器(serial,parallel,CMS)无一不例外都把heap分成固定大小连续的三个空间：young generation, old generation, and permanent generation
+[![4aQqO0.png](https://z3.ax1x.com/2021/09/22/4aQqO0.png)](https://imgtu.com/i/4aQqO0)
+但G1却独辟蹊径，采用了一种全新的内存布局
+[![4aQxkF.png](https://z3.ax1x.com/2021/09/22/4aQxkF.png)](https://imgtu.com/i/4aQxkF)
+在G1中堆被分成一块块大小相等的heap region，一般有2000多块，这些region在逻辑上是连续的。每块region都会被打唯一的分代标志(eden,survivor,old)。在逻辑上，eden regions构成Eden空间，survivor regions构成Survivor空间，old regions构成了old 空间。
+
+G1中每个Region大小是固定相等的，Region的大小可以通过参数-XX:G1HeapRegionSize设定，取值范围从1M到32M，且是2的指数。如果不设定，那么G1会根据Heap大小自动决定。
+
+**YGC是否需要扫描整个老年代？**
+我们知道判断对象是否存活需要从GC ROOTS结点出发，从GC ROOTS结点可达的对象就是存活的。在YGC时，老年代中的对象是不回收的，也就意味着GC ROOTS里面应包含了老年代中的对象。**但扫描整个老年代会很耗费时间，势必影响整个GC的性能！。所以在CMS中使用了Card Table的结构，里面记录了老年代对象到新生代引用。**Card Table的结构是一个连续的byte[]数组，扫描Card Table的时间比扫描整个老年代的代价要小很多！G1也参照了这个思路，不过采用了一种新的数据结构 Remembered Set 简称Rset。RSet记录了其他Region中的对象引用本Region中对象的关系，属于points-into结构（谁引用了我的对象）。而Card Table则是一种points-out（我引用了谁的对象）的结构，每个Card 覆盖一定范围的Heap（一般为512Bytes）。G1的RSet是在Card Table的基础上实现的：每个Region会记录下别的Region有指向自己的指针，并标记这些指针分别在哪些Card的范围内。 这个RSet其实是一个Hash Table，Key是别的Region的起始地址，Value是一个集合，里面的元素是Card Table的Index。**每个Region都有一个对应的Rset。**
+
+[![4alDBV.png](https://z3.ax1x.com/2021/09/22/4alDBV.png)](https://imgtu.com/i/4alDBV)
+
+RSet究竟是怎么辅助GC的呢？在做YGC的时候，只需要选定young generation region的RSet作为根集，这些RSet记录了old->young的跨代引用，避免了扫描整个old generation。 而mixed gc的时候，old generation中记录了old->old的RSet，young->old的引用由扫描全部young generation region得到，这样也不用扫描全部old generation region。所以RSet的引入大大减少了GC的工作量。
+
+所以G1中YGC不需要扫描整个老年代，只需要扫描Rset就可以知道老年代引用了哪些新生代中的对象。
+
 **G1 (Garbage-First) 是一款面向服务器的垃圾收集器,主要针对配备多颗处理器及大容量内存的机器. 以极高概率满足 GC 停顿时间要求的同时,还具备高吞吐量性能特征.**
 
 被视为 JDK1.7 中 HotSpot 虚拟机的一个重要进化特征。它具备一下特点：
