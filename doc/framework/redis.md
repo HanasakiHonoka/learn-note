@@ -5,6 +5,232 @@
 
 因为传统的关系型数据库如Mysql已经不能适用所有的场景了，比如秒杀的库存扣减，APP首页的访问流量高峰等等，都很容易把数据库打崩，所以引入了缓存中间件，目前市面上比较常用的缓存中间件有 Redis 和 Memcached 不过中和考虑了他们的优缺点，最后选择了Redis。
 
+## Redis数据结构的底层实现
+### 简单动态字符串（SDS）
+SDS的结构定义在sds.h文件中，SDS的定义在Redis 3.2版本之后有一些改变，由一种数据结构变成了5种数据结构，会根据SDS存储的内容长度来选择不同的结构，以达到节省内存的效果，具体的结构定义，我们看以下代码
+```
+// 3.0
+struct sdshdr {
+    // 记录buf数组中已使用字节的数量，即SDS所保存字符串的长度
+    unsigned int len;
+    // 记录buf数据中未使用的字节数量
+    unsigned int free;
+    // 字节数组，用于保存字符串
+    char buf[];
+};
+
+// 3.2
+/* Note: sdshdr5 is never used, we just access the flags byte directly.
+ * However is here to document the layout of type 5 SDS strings. */
+struct __attribute__ ((__packed__)) sdshdr5 {
+    unsigned char flags; /* 3 lsb of type, and 5 msb of string length */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr8 {
+    uint8_t len; /* used */
+    uint8_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr16 {
+    uint16_t len; /* used */
+    uint16_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr32 {
+    uint32_t len; /* used */
+    uint32_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr64 {
+    uint64_t len; /* used */
+    uint64_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+
+```
+下面以3.2版本的sdshdr8看一个示例
+[![4UcRMt.png](https://z3.ax1x.com/2021/09/22/4UcRMt.png)](https://imgtu.com/i/4UcRMt)
+* len：记录当前已使用的字节数（不包括'\0'），获取SDS长度的复杂度为O
+* alloc：记录当前字节数组总共分配的字节数量（不包括'\0'）
+* flags：标记当前字节数组的属性，是sdshdr8还是sdshdr16等，flags值的定义如下
+```
+  // flags值定义
+#define SDS_TYPE_5  0
+#define SDS_TYPE_8  1
+#define SDS_TYPE_16 2
+#define SDS_TYPE_32 3
+#define SDS_TYPE_64 4
+```
+
+* buf：字节数组，用于保存字符串，包括结尾空白字符'\0'
+
+#### SDS与C字符串的区别
+* **常数复杂度获取字符串长度**
+* **杜绝缓冲区溢出，减少修改字符串时带来的内存重分配次数**：C字符串不记录自身的长度，每次增长或缩短一个字符串，都要对底层的字符数组进行一次内存重分配操作。如果是拼接append操作之前没有通过内存重分配来扩展底层数据的空间大小，就会产生缓存区溢出；如果是截断trim操作之后没有通过内存重分配来释放不再使用的空间，就会产生内存泄漏；
+而SDS通过未使用空间解除了字符串长度和底层数据长度的关联，3.0版本是用free属性记录未使用空间，3.2版本则是alloc属性记录总的分配字节数量。通过未使用空间，SDS实现了空间预分配和惰性空间释放两种优化的空间分配策略，解决了字符串拼接和截取的空间问题
+* **二进制安全**：C字符串中的字符必须符合某种编码，除了字符串的末尾，字符串里面是不能包含空字符的，否则会被认为是字符串结尾，这些限制了C字符串只能保存文本数据，而不能保存像图片这样的二进制数据
+而SDS的API都会以处理二进制的方式来处理存放在buf数组里的数据，不会对里面的数据做任何的限制。SDS使用len属性的值来判断字符串是否结束，而不是空字符
+
+### 链表
+链表是一种比较常见的数据结构了，特点是易于插入和删除、内存利用率高、且可以灵活调整链表长度，但随机访问困难。许多高级编程语言都内置了链表的实现，但是C语言并没有实现链表，所以Redis实现了自己的链表数据结构
+链表在Redis中应用的非常广，列表（List）的底层实现就是链表。此外，Redis的发布与订阅、慢查询、监视器等功能也用到了链表
+#### 链表节点和链表的定义
+链表上的节点定义如下，adlist.h/listNode
+```
+typedef struct listNode {
+    // 前置节点
+    struct listNode *prev;
+    // 后置节点
+    struct listNode *next;
+    // 节点值
+    void *value;
+} listNode;
+
+```
+链表的定义如下，adlist.h/list
+```
+typedef struct list {
+    // 链表头节点
+    listNode *head;
+    // 链表尾节点
+    listNode *tail;
+    // 节点值复制函数
+    void *(*dup)(void *ptr);
+    // 节点值释放函数
+    void (*free)(void *ptr);
+    // 节点值对比函数
+    int (*match)(void *ptr, void *key);
+    // 链表所包含的节点数量
+    unsigned long len;
+} list;
+
+```
+每个节点listNode可以通过prev和next指针分布指向前一个节点和后一个节点组成双端链表，同时每个链表还会有一个list结构为链表提供表头指针head、表尾指针tail、以及链表长度计数器len，还有三个用于实现多态链表的类型特定函数
+
+dup：用于复制链表节点所保存的值
+free：用于释放链表节点所保存的值
+match：用于对比链表节点所保存的值和另一个输入值是否相等
+[![4Ug5Ox.png](https://z3.ax1x.com/2021/09/22/4Ug5Ox.png)](https://imgtu.com/i/4Ug5Ox)
+#### 链表有哪些特性
+* 双端链表：带有指向前置节点和后置节点的指针，获取这两个节点的复杂度为O(1)
+* 无环：表头节点的prev和表尾节点的next都指向NULL，对链表的访问以NULL结束
+* 链表长度计数器：带有len属性，获取链表长度的复杂度为O(1)
+* 多态：链表节点使用 void*指针保存节点值，可以保存不同类型的值
+
+### 字典的定义实现
+Redis的字典底层是使用哈希表实现的，一个哈希表里面可以有多个哈希表节点，每个哈希表节点中保存了字典中的一个键值对
+
+哈希表结构定义，dict.h/dictht
+```
+typedef struct dictht {
+    // 哈希表数组
+    dictEntry **table;
+    // 哈希表大小
+    unsigned long size;
+    // 哈希表大小掩码，用于计算索引值，等于size-1
+    unsigned long sizemask;
+    // 哈希表已有节点的数量
+    unsigned long used;
+} dictht;
+
+```
+哈希表是由数组table组成，table中每个元素都是指向dict.h/dictEntry结构的指针，哈希表节点的定义如下
+```
+typedef struct dictEntry {
+    // 键
+    void *key;
+    // 值
+    union {
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+        double d;
+    } v;
+    // 指向下一个哈希表节点，形成链表
+    struct dictEntry *next;
+} dictEntry;
+
+```
+其中key是我们的键；v是键值，可以是一个指针，也可以是整数或浮点数；next属性是指向下一个哈希表节点的指针，可以让多个哈希值相同的键值对形成链表，解决键冲突问题
+
+最后就是我们的字典结构，dict.h/dict
+```
+typedef struct dict {
+    // 和类型相关的处理函数
+    dictType *type;
+    // 私有数据
+    void *privdata;
+    // 哈希表
+    dictht ht[2];
+    // rehash 索引，当rehash不再进行时，值为-1
+    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    // 迭代器数量
+    unsigned long iterators; /* number of iterators currently running */
+} dict;
+
+```
+dict的ht属性是两个元素的数组，包含两个dictht哈希表，一般字典只使用ht[0]哈希表，ht[1]哈希表会在对ht[0]哈希表进行rehash（重哈希）的时候使用，即当哈希表的键值对数量超过负载数量过多的时候，会将键值对迁移到ht[1]上
+rehashidx也是跟rehash相关的，rehash的操作不是瞬间完成的，rehashidx记录着rehash的进度，如果目前没有在进行rehash，它的值为-1
+
+结合上面的几个结构，我们来看一下字典的结构图（没有在进行rehash）
+[![4U2Jj1.png](https://z3.ax1x.com/2021/09/22/4U2Jj1.png)](https://imgtu.com/i/4U2Jj1)
+在这里，哈希算法和rehash(重新散列)的操作不再详细说明，有机会以后单独介绍
+当一个新的键值对要添加到字典中时，会根据键值对的键计算出哈希值和索引值，根据索引值放到对应的哈希表上，即如果索引值为0，则放到ht[0]哈希表上。当有两个或多个的键分配到了哈希表数组上的同一个索引时，就发生了键冲突的问题，哈希表使用链地址法来解决，即使用哈希表节点的next指针，将同一个索引上的多个节点连接起来。当哈希表的键值对太多或太少，就需要对哈希表进行扩展和收缩，通过rehash(重新散列)来执行
+
+### 跳跃表
+一个普通的单链表查询一个元素的时间复杂度为O(N)，即便该单链表是有序的。使用跳跃表（SkipList）是来解决查找问题的，它是一种有序的数据结构，不属于平衡树结构，也不属于Hash结构，它通过在每个节点维持多个指向其他节点的指针，而达到快速访问节点的目的
+跳跃表是有序集合（Sorted Set）的底层实现之一，如果有序集合包含的元素比较多，或者元素的成员是比较长的字符串时，Redis会使用跳跃表做有序集合的底层实现
+
+#### 跳跃表的定义
+Redis的跳跃表实现是由redis.h/zskiplistNode和redis.h/zskiplist（3.2版本之后redis.h改为了server.h）两个结构定义，zskiplistNode定义跳跃表的节点，zskiplist保存跳跃表节点的相关信息
+
+```
+/* ZSETs use a specialized version of Skiplists */
+typedef struct zskiplistNode {
+    // 成员对象 （robj *obj;）
+    sds ele;
+    // 分值
+    double score;
+    // 后退指针
+    struct zskiplistNode *backward;
+    // 层
+    struct zskiplistLevel {
+        // 前进指针
+        struct zskiplistNode *forward;
+        // 跨度
+        // 跨度实际上是用来计算元素排名(rank)的，在查找某个节点的过程中，将沿途访过的所有层的跨度累积起来，得到的结果就是目标节点在跳跃表中的排位
+        unsigned long span;
+    } level[];
+} zskiplistNode;
+
+typedef struct zskiplist {
+    // 表头节点和表尾节点
+    struct zskiplistNode *header, *tail;
+    // 表中节点的数量
+    unsigned long length;
+    // 表中层数最大的节点的层数
+    int level;
+} zskiplist;
+
+```
+zskiplistNode结构
+
+level数组（层）：每次创建一个新的跳表节点都会根据幂次定律计算出level数组的大小，也就是次层的高度，每一层带有两个属性-前进指针和跨度，前进指针用于访问表尾方向的其他指针；跨度用于记录当前节点与前进指针所指节点的距离（指向的为NULL，阔度为0）
+backward（后退指针）：指向当前节点的前一个节点
+score（分值）：用来排序，如果分值相同看成员变量在字典序大小排序
+obj或ele：成员对象是一个指针，指向一个字符串对象，里面保存着一个sds；在跳表中各个节点的成员对象必须唯一，分值可以相同
+
+zskiplist结构
+
+header、tail表头节点和表尾节点
+length表中节点的数量
+level表中层数最大的节点的层数
+[![4URDaT.png](https://z3.ax1x.com/2021/09/22/4URDaT.png)](https://imgtu.com/i/4URDaT)
+
 ## Redis有哪些数据结构
 
 String、Hash、List、Set、SortedSet。
@@ -220,6 +446,12 @@ Redis 的 key 可以设置过期时间，过期后 Redis 采用主动和被动�
 * 使用随机退避方式，失效时随机 sleep 一个很短的时间，再次查询，如果失败再执行更新。
 * 针对多个热点 key 同时失效的问题，可以在缓存时使用固定时间加上一个小的随机数，避免大量热点 key 同一时刻失效。
 
+### redis系统高可用保障手段
+一般避免以上情况发生我们从三个时间段去分析下：
+
+事前：Redis 高可用，主从+哨兵，Redis cluster，避免全盘崩溃。
+事中：本地 ehcache 缓存 + Hystrix 限流+降级，避免 MySQL 被打死。
+事后：Redis 持久化 RDB+AOF，一旦重启，自动从磁盘上加载数据，快速恢复缓存数据。
 
 ### 缓存雪崩
 缓存雪崩，产生的原因是缓存挂掉，这时所有的请求都会穿透到 DB。
