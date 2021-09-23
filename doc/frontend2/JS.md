@@ -112,6 +112,23 @@ var obj={
     age:"500",
     say:function(){
         var bj=40;
+        console.log(this);//就是obj这个对象
+        console.log(this.bj);//undefined
+        console.log(this.name);//八戒
+    }
+}
+obj.say();
+window.obj.say();
+//对象方法的this指向对象
+```
+
+```javascript
+var bj=10;
+var obj={
+    name:"八戒",
+    age:"500",
+    say:function(){
+        var bj=40;
         console.log(this);//window
         console.log(this.bj);//10
         console.log(this.name);//这里没有输出内容
@@ -286,9 +303,98 @@ console.log(s1 === s2); // false
 #### CommonJS
 Node.js是commonJS规范的主要实践者，它有四个重要的环境变量为模块化的实现提供支持：`module、exports、require、global`。实际使用时，用`module.exports`定义当前模块对外输出的接口（不推荐直接用`exports`），用`require`加载模块.
 #### AMD和require.js
-。。。
 
 
+
+commonjs是值拷贝， es是值引用
+
+commonjs是运行时加载， es是编译时加载
+
+commonjs：
+```javascript
+moudule.exports = xxx
+require()
+```
+es6
+```javascript
+export 
+import {} form ''
+```
 ### instanceof
 
+
+
+### 变量提升 函数提升
+
+参考：
+https://www.cnblogs.com/liuhe688/p/5891273.html
+
+简单来说函数优先级更高，会将函数整体提升定义在作用域的顶部
+而变量提升只是在前面进行了声明。
+函数有三种：
+```javascript
+foo = function foo(){} 具名函数表达式 ， 能函数提升
+function foo(){}  函数声明， 能函数提升
+foo = function(){} 匿名函数表达式 ， 【不能】
+```
+
+变量提升特例：
+```javascript
+var foo=2;
+function test(){
+  var foo = foo || 3;
+  console.log(foo);
+}
+test();  //3
+```
+因为 `var foo = foo || 3` 中第二个foo 此时为undifined 
+
+
+### Promise
+promise.then()
+  需要等上一步给出的resolve 才能接着走下去
+```javascript
+console.log('start');
+new Promise((resolve,reject)=>{
+    setTimeout(function(){
+        console.log('step');
+        resolve(110);
+    },1000);
+    new Promise((resolve,reject)=>{
+        
+            console.log('pp');
+           resolve('pp');
+    }).then((value)=>{
+        console.log('pp then');})
+})
+.then((value)=>{
+    console.log('then1',value)
+    return new Promise((resolve,reject)=>{
+        setTimeout(function(){
+            console.log('step1');
+            resolve(value);
+        },1000)
+    })
+    .then((value)=>{
+        console.log('step 1-1');
+        return value;
+    })
+    .then((value)=>{
+        console.log('step 1-2');
+        return value;
+    })
+})
+.then((value)=>{
+    console.log(value);
+    console.log('step 2');
+})
+```
+执行结果为：
+`start  - pp - pp then `
+
+同步代码执行 （new Promise） 在这一步进行了SetTimeout的宏任务注册，pp.then 的微任务注册并 清空全部微任务。
+
+1s后：`step - then1 110  step1 step1-1 step1-2  step2`
+
+then中的return 会优先执行在后面的then前
 
