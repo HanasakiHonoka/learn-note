@@ -452,6 +452,75 @@ public static void method1() {
 在 Java 6 之后自旋锁是自适应的，比如对象刚刚的一次自旋操作成功过，那么认为这次自旋成功的可能性会
 高，就多自旋几次；反之，就少自旋甚至不自旋，总之，比较智能。Java 7 之后不能控制是否开启自旋功能
 
+### ABA问题怎么解决
+JDK的atomic包里提供了一个类AtomicStampedReference来解决ABA问题。如果当前引用 == 预期引用，并且当前标志等于预期标志，则以原子方式将该引用和该标志的值设置为给定的更新值。源码如下：
+```java
+/**
+ *expectedReference - 该引用的预期值
+ *newReference - 该引用的新值
+ *expectedStamp - 该标志的预期值
+ *newStamp - 该标志的新值
+ */
+public boolean compareAndSet(V   expectedReference,
+                                 V   newReference,
+                                 int expectedStamp,
+                                 int newStamp) {
+        Pair<V> current = pair;
+        return
+            expectedReference == current.reference &&
+            expectedStamp == current.stamp &&
+            ((newReference == current.reference &&
+              newStamp == current.stamp) ||
+             casPair(current, Pair.of(newReference, newStamp)));
+    }
+```
+最佳时间
+```java
+    private static AtomicStampedReference<Integer> atomicStampedRef =
+            new AtomicStampedReference<Integer>(100, 0);
+
+        Thread refT1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                atomicStampedRef.compareAndSet(100, 101,
+                        atomicStampedRef.getStamp(), atomicStampedRef.getStamp() + 1);
+                log("thread refT1:" + atomicStampedRef.getReference());
+                atomicStampedRef.compareAndSet(101, 100,
+                        atomicStampedRef.getStamp(), atomicStampedRef.getStamp() + 1);
+                log("thread refT1:" + atomicStampedRef.getReference());
+            }
+        });
+
+        Thread refT2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int stamp = atomicStampedRef.getStamp();
+                log("before sleep : stamp = " + stamp);    // stamp = 0
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                log("after sleep : stamp = " + atomicStampedRef.getStamp());//stamp = 1
+                boolean c3 = atomicStampedRef.compareAndSet(100, 101, stamp, stamp + 1);
+                log("thread refT2:" + atomicStampedRef.getReference() + ",c3 is " + c3);        //true
+            }
+        });
+
+        refT1.start();
+        refT2.start();
+    }
+
+    private static void log(String logString) {
+        System.out.println(logString);
+    }
+```
+
 ### 偏向锁
 
 轻量级锁在没有竞争时（就自己这个线程），每次重入仍然需要执行 CAS 操作。Java 6 中引入了偏向锁来做进一步优化：
@@ -569,6 +638,7 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 - **`volatile`关键字主要用于解决变量在多个线程之间的可见性，而 `synchronized` 关键字解决的是多个线程之间访问资源的同步性。**
 
 # ThreadLocal
+
 
 # 线程池
 

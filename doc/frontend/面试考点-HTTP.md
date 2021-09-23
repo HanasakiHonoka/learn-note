@@ -385,3 +385,57 @@ Nginx 默认提供了 3 种负载均衡策略：
 **3、最少连接 least_conn**
 
 下一个请求将被分派到活动连接数量最少的服务器
+
+## 常用HTTP头有哪些
+
+Accept: 允许哪些媒体类型。 
+
+Accept-Charset: 允许哪些字符集。 
+
+Accept-Encoding: 允许哪些编码。
+
+Accept-Language: 允许哪些语言。 
+
+Cache-Control: 缓存策略，如no-cache，详见官方文档。 
+
+Connection: 控制代理不再转发的首部字段，控制持久连接+  
+
+Host: 请求的主机。
+
+If-None-Match: 判断请求实体的Etag是否包含在If-None-Match中，如果包含，则返回304，使用缓存，见Etag。 
+
+If-Modified-Since: 判断修改时间是否一致，如果一致，则使用缓存。 
+
+If-Match: 与If-None-Match相反。 If-Unmodified-Since: 与If-Modified-Since相反。 
+
+Referer: 表明这个请求发起的源头。 
+
+User-Agent: 将创建请求的浏览器和用户代理名称等信息传达给服务器。
+
+Content-Encoding: 返回内容的编码，如gzip。 
+
+Content-Language: 返回内容的语言。 
+
+Content-Length: 返回内容的字节长度。
+
+Content-Type: 返回内容的媒体类型，如text/html。 
+
+Date: 创建HTTP报文的日期和时间
+
+Etag: entity tag，实体标签，给每个实体生成一个单独的值，用于客户端缓存，与If-None-Match配合使用。 
+
+Expires: 设置缓存过期时间，Cache-Control也会相应变化。 
+
+Last-Modified: 最近修改时间，用于客户端缓存，与If-Modified-Since配合使用。
+
+Server: 服务器信息。  
+
+Vary: 
+
+WEB服务器用该头部的内容告诉 Cache 服务器，在什么条件下才能用本响应所返回的对象响应后续的请求。假如源WEB服务器在接到第一个请求消息时，其响应消息的头部为：Content-Encoding: gzip; Vary: Content-Encoding那么 Cache 服务器会分析后续请求消息的头部，检查其 Accept-Encoding，是否跟先前响应的 Vary 头部值一致，即是否使用相同的内容编码方法，这样就可以防止 Cache 服务器用自己 Cache 里面压缩后的实体响应给不具备解压能力的浏览器。 
+
+Range: bytes=5001-10000 返回206，无法处理返回200和全部资源
+
+If-Range:  ETag值或者时间
+
+Retry-After：配合503 告诉什么时间再次发送请求
