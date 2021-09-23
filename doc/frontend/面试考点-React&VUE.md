@@ -193,43 +193,126 @@ console.log('push结束了');
 
 ### diff策略
 
-![](https://www.hualigs.cn/image/6098cc90c6c3f.jpg)
 
-#### **tree diff**
 
-策略一：Web UI 中 DOM 节点跨层级的移动操作特别少。可以忽略不计。
+![4dmfsK.png](https://z3.ax1x.com/2021/09/23/4dmfsK.png)
 
-对于策略一，React 对树的算法进行了简介明了的优化，即对树进行分层比较，两颗树只会对同一层级的节点进行比较。
+#### 虚拟dom库
 
-既然 DOM 节点跨层级的移动，可以少到忽略不计，针对这种现象，React 通过 updateDepth 对 Virtual DOM 树进行层级控制，只对相同层级的DOM节点进行比较，即同一父节点下的所有子节点，当发现该节点已经不存在时，则该节点及其子节点会被完全删除掉，不会用于进一步的比较。这样只需要对树进行一次遍历，便能完成整个DOM树的比较。
+- **Snabbdom**
 
-由于 React 只会简单的考虑同层级节点的位置变换，对于不同层级的节点，只有创建和删除操作。当根节点R发现子节点中A消失了，就会直接销毁A；当D节点发现多了一个子节点A，就会创建新的A子节点（包括其子节点）。执行的操作为：
+- - Vue.js2.x内部使用的虚拟DOM就是改造的Snabbdom
+  - 大约200SLOC(single line of code)
+  - 通过模块可扩展
+  - 源码使用TypeScript开发
+  - 最快的Virtual DOM之一
 
-create A —> create B —> create C —> delete A
+#### diff算法
 
-所以。当出现节点跨级移动时，并不会像想象中的那样执行移动操作，而是以 A 为根节点的整个树被整个重新创建，这是影响 React 性能的操作，所以 官方建议不要进行 DOM 节点跨层级的操作。
+##### snabbdom的核心
 
-#### **component diff**
+- `init()`设置模块.创建`patch()`函数
+- 使用`h()`函数创建JavaScript对象`(Vnode)`描述`真实DOM`
+- `patch()`比较`新旧两个Vnode`
+- 把变化的内容更新到`真实DOM树`
 
-如果是同一类型的组件，按照原策略继续比较 Virtual DOM 树即可
+#### init函数
 
-如果不是，则将该组件判断为 dirty component，从而替换整个组件下的所有子节点
+```js
+import {init} from 'snabbdom/build/package/init.js'
+import {h} from 'snabbdom/build/package/h.js'
 
-对于同一类型下的组件，有可能其 Virtual DOM 没有任何变化，如果能确切知道这一点，那么就可以节省大量的 diff 算法时间。因此， React 允许用户通过 shouldComponentUpdate()来判断该组件是否需要大量 diff 算法分析。不同类型的组件很少存在相似 DOM 树的情况，因此，这种极端因素很难在实际开发过程中造成重大影响。
+// 1.导入模块
+import {styleModule} from "snabbdom/build/package/modules/style";
+import {eventListenersModule} from "snabbdom/build/package/modules/eventListeners";
 
-#### **element diff**
+// 2.注册模块
+const patch = init([
+  styleModule,
+  eventListenersModule
+])
 
-INSERT_MARKUP（插入）：如果新的组件类型不在旧集合里，即全新的节点，需要对新节点执行插入操作。
+// 3.使用h()函数的第二个参数传入模块中使用的数据(对象)
+let vnode = h('div', [
+  h('h1', {style: {backgroundColor: 'red'}}, 'Hello world'),
+  h('p', {on: {click: eventHandler}}, 'Hello P')
+])
 
-MOVE_EXISTING （移动）：旧集合中有新组件类型，且 element 是可更新的类型，generatorComponentChildren 已调用 receiveComponent，这种情况下 prevChild=nextChild，就需要做移动操作，可以复用以前的 DOM 节点。
+function eventHandler() {
+  alert('疼,别摸我')
+}
 
-REMOVE_NODE （删除）：旧组件类型，在新集合里也有，但对应的 elememt 不同则不能直接复用和更新，需要执行删除操作，或者旧组件不在新集合里的，也需要执行删除操作。
+const app = document.querySelector('#app')
 
-React发现这样操作非常繁琐冗余，因为这些集合里含有相同的节点，只是节点位置发生了变化而已，却发生了繁琐的删除、创建操作，实际上只需要对这些节点进行简单的位置移动即可。
+patch(app,vnode)
+复制代码
+```
 
-针对这一现象，React 提出了优化策略：
+init函数时设置模块,然后创建patch()函数,当init使用了导入的模块就能够在h函数中用这些模块提供的api去创建`虚拟DOM(Vnode)对象`;在上文中就使用了`样式模块`以及`事件模块`让创建的这个虚拟DOM具备样式属性以及事件属性,最终通过`patch函数`对比`两个虚拟dom`(会先把app转换成虚拟dom),更新视图。
 
-允许开发者对同一层级的同组子节点，添加唯一key进行区分，虽然只是小小的改动，但性能上却发生了翻天覆地的变化。
+#### h函数
+
+一些地方也会用`createElement`来命名,它们是一样的东西,都是创建`虚拟DOM`的。
+
+**总结**:`h函数`先生成一个`vnode`函数,然后`vnode`函数再生成一个`Vnode`对象(虚拟DOM对象)。
+
+#### patch函数(核心)
+
+- pactch(oldVnode,newVnode)
+- 把新节点中变化的内容渲染到真实DOM,最后返回新节点作为下一次处理的旧节点(核心)
+- 对比新旧`VNode`是否相同节点(节点的key和sel相同)
+- 如果不是相同节点,删除之前的内容,重新渲染
+- 如果是相同节点,再判断新的`VNode`是否有`text`,如果有并且和`oldVnode`的`text`不同直接更新文本内容`(patchVnode)`
+- 如果新的VNode有children,判断子节点是否有变化`(updateChildren,最麻烦,最难实现)`
+
+**patchVnode：**
+
+![4dwSGq.png](https://z3.ax1x.com/2021/09/23/4dwSGq.png)
+
+**updateChildren:**
+
+这个函数我分为三个部分,
+- `部分1:声明变量`,
+- `部分2:同级别节点比较`,
+- `部分3:循环结束的收尾工作`
+
+![4dwdQf.png](https://z3.ax1x.com/2021/09/23/4dwdQf.png)
+
+`同级别节点比较`的`五种`情况:
+
+- 1. `oldStartVnode/newStartVnode`(旧开始节点/新开始节点)相同
+  2. `oldEndVnode/newEndVnode`(旧结束节点/新结束节点)相同
+  3. `oldStartVnode/newEndVnode`(旧开始节点/新结束节点)相同
+  4. `oldEndVnode/newStartVnode`(旧结束节点/新开始节点)相同
+  5. `特殊情况当1,2,3,4的情况都不符合`的时候就会执行,在`oldVnodes`里面寻找跟`newStartVnode`一样的节点然后位移到`oldStartVnode`,若没有找到在就`oldStartVnode`创建一个
+
+- 执行过程是一个循环,在每次循环里,只要执行了上述的情况的五种之一就会结束一次循环
+
+- `循环结束的收尾工作`:直到oldStartIdx>oldEndIdx || newStartIdx>newEndIdx(代表旧节点或者新节点已经遍历完)
+
+### React函数式组件和类组件的区别
+
+1. 函数组件看似只是一个返回值是DOM结构的函数，其实它的背后是无状态组件（Stateless Components）的思想。**函数组件中，你无法使用State，也无法使用组件的生命周期方法，**这就决定了函数组件都是展示性组件（Presentational Components），接收Props，渲染DOM，而不关注其他逻辑。
+
+2. 函数组件中没有this。所以你再也不需要考虑this带来的烦恼。而在类组件中，你依然要记得绑定this这个琐碎的事情。
+
+3. 函数组件更容易理解。当你看到一个函数组件时，你就知道它的功能只是接收属性，渲染页面，它不执行与UI无关的逻辑处理，它只是一个**纯函数**。而不用在意它返回的DOM结构有多复杂。
+
+4. 函数式组件可以直接调用，返回一个新的React元素；类组件在调用时是需要创建一个实例的，然后通过调用实例里的render方法来返回一个React元素。
+5. 类组件没有具体的要求。函数式组件一般是用在大型项目中来分割大组件（函数式组件不用创建实例，所有更高效），一般情况下能用函数式组件就不用类组件，提升效率。
+
+### React key的作用
+
+- key相同：若组件属性有所变化，则react只更新组件对应的属性；没有变化则不更新。
+- key值不同：则react先销毁该组件，然后重新创建该组件。
+
+**用法：**
+
+- 纯静态的同级同结构节点的渲染，可以采用index作为key的值，因为这里不需要动态去变化节点里面的内容的值；
+- 对于一组动态变化的数组来说，采用index作为key的值，会有可能出现问题，因为index的值和数组内的元素内容不具有关联性，所以即使采用了index作为key，子组件的内容有可能不会随着属性的变化而发生变化（只要组件内该元素不与属性构成联系），所以一般采用数组中元素的某一个唯一值作为key，这样一来，只要统一位置的节点的key值不一致，就会直接销毁和新建而不是直接更新；
+- 对于一个不想受到父组件属性状态影响而导致没必要的渲染的组件，可以采用key值，因为只要key值不发生改变，组件的属性不变，即使父组件渲染，该组件也不会发生变化，只有组件的状态或者属性发生变化，组件才会二次渲染；一旦key值变化，就直接组件销毁然后再新建该组件。
+
+
 
 ## Redux
 
