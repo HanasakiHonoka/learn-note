@@ -313,3 +313,23 @@ z-index 属性设置元素的堆叠顺序。拥有更高堆叠顺序的元素总
 * 在其他浏览器中的默认值为auto，不参与到层级元素的比较，其设置了z-index的子节点直接跳过“从父规则”加入到层级元素的比较。
   
 
+### 媒体查询
+
+```css
+@media *mediatype* and|not|only *(media feature)* {*
+  CSS-Code;
+*}
+```
+
+举例
+
+如果文档宽度小于 300 像素则修改背景颜色(background-color):
+
+```css
+@media screen and (max-width: 300px) {
+  body {
+    background-color:lightblue;
+  }
+}
+```
+

@@ -292,13 +292,13 @@ init函数时设置模块,然后创建patch()函数,当init使用了导入的模
 
 ### React函数式组件和类组件的区别
 
-1. 函数组件看似只是一个返回值是DOM结构的函数，其实它的背后是无状态组件（Stateless Components）的思想。**函数组件中，你无法使用State，也无法使用组件的生命周期方法，**这就决定了函数组件都是展示性组件（Presentational Components），接收Props，渲染DOM，而不关注其他逻辑。
+1. 函数组件看似只是一个返回值是DOM结构的函数，其实它的背后是**无状态组件**（Stateless Components）的思想。**函数组件中，你无法使用State，也无法使用组件的生命周期方法，**这就决定了函数组件都是展示性组件（Presentational Components），接收Props，渲染DOM，而不关注其他逻辑。
 
 2. 函数组件中没有this。所以你再也不需要考虑this带来的烦恼。而在类组件中，你依然要记得绑定this这个琐碎的事情。
 
 3. 函数组件更容易理解。当你看到一个函数组件时，你就知道它的功能只是接收属性，渲染页面，它不执行与UI无关的逻辑处理，它只是一个**纯函数**。而不用在意它返回的DOM结构有多复杂。
 
-4. 函数式组件可以直接调用，返回一个新的React元素；类组件在调用时是需要创建一个实例的，然后通过调用实例里的render方法来返回一个React元素。
+4. 函数式组件可以**直接调用**，返回一个新的React元素；类组件在调用时是需要**创建一个实例**的，然后通过**调用实例里的render方法**来返回一个React元素。
 5. 类组件没有具体的要求。函数式组件一般是用在大型项目中来分割大组件（函数式组件不用创建实例，所有更高效），一般情况下能用函数式组件就不用类组件，提升效率。
 
 ### React key的作用
@@ -312,7 +312,427 @@ init函数时设置模块,然后创建patch()函数,当init使用了导入的模
 - 对于一组动态变化的数组来说，采用index作为key的值，会有可能出现问题，因为index的值和数组内的元素内容不具有关联性，所以即使采用了index作为key，子组件的内容有可能不会随着属性的变化而发生变化（只要组件内该元素不与属性构成联系），所以一般采用数组中元素的某一个唯一值作为key，这样一来，只要统一位置的节点的key值不一致，就会直接销毁和新建而不是直接更新；
 - 对于一个不想受到父组件属性状态影响而导致没必要的渲染的组件，可以采用key值，因为只要key值不发生改变，组件的属性不变，即使父组件渲染，该组件也不会发生变化，只有组件的状态或者属性发生变化，组件才会二次渲染；一旦key值变化，就直接组件销毁然后再新建该组件。
 
+### React父子组件通信方法
 
+- 父组件向子组件通信：使用 props
+- 子组件向父组件通信：使用 props 回调
+- 跨级组件间通信：使用 context 对象
+- 非嵌套组件间通信：使用事件订阅
+
+eg：
+
+#### context
+
+父组件需要声明自己支持 context，并提供 context 中属性的 PropTypes
+
+子组件需要声明自己需要使用 context，并提供其需要使用的 context 属性的 PropTypes
+
+父组件需提供一个 getChildContext 函数，以返回一个初始的 context 对象
+
+```jsx
+export const {Provider,Consumer} = React.createContext("默认名称");
+// father <Provider value={name}>
+//son <Customer>
+```
+
+#### EventEmitter
+
+新建一个 ev.js，引入 events 包，并向外提供一个事件对象，供通信时使用：
+
+```js
+import { EventEmitter } from "events";
+export default new EventEmitter();
+```
+
+Foo.js：
+
+```jsx
+import React,{ Component } from "react";
+import emitter from "./ev"
+
+export default class Foo extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            msg:null,
+        };
+    }
+    componentDidMount(){
+        // 声明一个自定义事件
+        // 在组件装载完成以后
+        this.eventEmitter = emitter.addListener("callMe",(msg)=>{
+            this.setState({
+                msg
+            })
+        });
+    }
+    // 组件销毁前移除事件监听
+    componentWillUnmount(){
+        emitter.removeListener(this.eventEmitter);
+    }
+    render(){
+        return(
+            <div>
+                { this.state.msg }
+                我是非嵌套 1 号
+            </div>
+        );
+    }
+}
+```
+
+Boo.js：
+
+```jsx
+import React,{ Component } from "react";
+import emitter from "./ev"
+
+export default class Boo extends Component{
+    render(){
+        const cb = (msg) => {
+            return () => {
+                // 触发自定义事件
+                emitter.emit("callMe","Hello")
+            }
+        }
+        return(
+            <div>
+                我是非嵌套 2 号
+                <button onClick = { cb("blue") }>点击我</button>
+            </div>
+        );
+    }
+}
+```
+
+
+
+## jquery ajax, Axios, Fetch区别
+
+### jQuery ajax
+
+```js
+$.ajax({
+   type: 'POST',
+   url: url,
+   data: data,
+   dataType: dataType,
+   success: function () {},
+   error: function () {}
+});
+```
+
+是对原生XHR的封装，除此以外还增添了对JSONP的支持。
+
+缺点：
+
+- 本身是针对MVC的编程,不符合现在前端MVVM的浪潮
+- 基于原生的XHR开发，XHR本身的架构不清晰，已经有了fetch的替代方案
+- JQuery整个项目太大，单纯使用ajax却要引入整个JQuery非常的不合理（采取个性化打包的方案又不能享受CDN服务）
+
+### Axios
+
+```js
+axios({
+    method: 'post',
+    url: '/user/12345',
+    data: {
+        firstName: 'Fred',
+        lastName: 'Flintstone'
+    }
+})
+.then(function (response) {
+    console.log(response);
+})
+.catch(function (error) {
+    console.log(error);
+});
+```
+
+Axios本质上也是对原生XHR的封装，只不过它是Promise的实现版本，符合最新的ES规范，从它的官网上可以看到它有以下几条特性：
+
+- 从 node.js 创建 http 请求
+- 支持 Promise API
+- 客户端支持防止CSRF
+- **提供了一些并发请求的接口**（axios.all和axios.spread）
+
+这个支持防止CSRF其实挺好玩的，是怎么做到的呢，就是让你的每个请求都带一个从cookie中拿到的key, 根据浏览器同源策略，假冒的网站是拿不到你cookie中得key的，这样，后台就可以轻松辨别出这个请求是否是用户在假冒网站上的误导输入，从而采取正确的策略。
+
+### Fetch
+
+Fetch API提供了一个JavaScript 接口，用于访问和操纵HTTP 管道的部分，例如请求和响应。
+
+1. 它提供了一个全局的`fetch()`方法，该方法提供了一种简单，合理的方式来跨网络以获取资源。 fetch 是一种 HTTP 数据请求方式，是 XMLHTTPRequest 的一种替代方案。 fetch 不是 ajax 的进一步封装，而是原生 js。 Fetch 函数就是原生 js。
+
+2. 当接收到一个代表错误的HTTP状态码时，从`fetch()`返回的Promise 不会被标记为reject，即使该HTTP相应的状态码是404 或者 500。 相反，它会将Promise状态标记为 resolve,仅当网络故障时或请求被阻止时，才会标记为reject。
+
+3. 默认情况， fetch不会从服务端发送或接受任何cookie，如果站点依赖于用户session，则会导致未经认证的请求。
+4. **response** 这里的response 只是一个HTTP响应，而不是真的JSON。为了获取JSON的内容我们需要使用对应的 .json() 、.text() 、 .blob()方法。
+
+**优缺点：**
+
+- 符合关注分离，没有将输入、输出和用事件来跟踪的状态混在一个对象里。
+- 更加底层，提供了API丰富（request、response）
+- 脱离了XHR，是ES规范里新的实现方式
+- 1. fetch 只对网络请求报错，对400/500 都当成功的请求，需要封装去处理
+- 2. fetch 默认不会带cookie，需要添加配置项
+- 3. etch不支持abort，不支持超时控制，使用setTimeout 及 Promise.reject 的实现的超时控制并不能阻止请求过程继续在后台运行，造成了量的浪费
+- 4. fetch没有办法原生检测请求的进度，而XHR可以
+
+ 
+
+## React和Vue相比原生JS有哪些提高
+
+- 不用写一大堆操作 DOM 的代码了，可能提高了工作效率
+
+- 操作 DOM 代码写的不好的话，可能会对性能造成影响
+
+- 框架流行以后，就有人会在这基础上造轮子，比如 UI 框架、组件通信，方便你更快的实现业务
+
+- 这些框架都有虚拟 DOM 的机制，这层机制可以实现跨端
+
+- 1，引入了前端数据流概念，数据和视图分离，数据驱动视图
+
+  2，引入组件化概念，方便复用，方便维护，方便扩展
+
+## React hooks
+
+### useState
+
+与 class 组件中的 `setState` 方法不同，`useState` 不会自动合并更新对象。你可以用函数式的 `setState` 结合展开运算符来达到合并更新对象的效果。
+
+```jsx
+setState(prevState => {
+  // 也可以使用 Object.assign
+  return {...prevState, ...updatedValues};
+});
+```
+
+### useEffect
+
+该 Hook 接收一个包含命令式、且可能有副作用代码的函数。
+
+在函数组件主体内（这里指在 React 渲染阶段）改变 DOM、添加订阅、设置定时器、记录日志以及执行其他包含副作用的操作都是不被允许的，因为这可能会产生莫名其妙的 bug 并破坏 UI 的一致性。
+
+使用 `useEffect` 完成副作用操作。赋值给 `useEffect` 的函数会在组件渲染到屏幕之后执行。你可以把 effect 看作从 React 的纯函数式世界通往命令式世界的逃生通道。
+
+#### effect 的执行时机
+
+与 `componentDidMount`、`componentDidUpdate` 不同的是，在浏览器完成布局与绘制**之后**，传给 `useEffect` 的函数会延迟调用。这使得它适用于许多常见的副作用场景，比如设置订阅和事件处理等情况，因此不应在函数中执行阻塞浏览器更新屏幕的操作。
+
+然而，并非所有 effect 都可以被延迟执行。例如，在浏览器执行下一次绘制前，用户可见的 DOM 变更就必须同步执行，这样用户才不会感觉到视觉上的不一致。（概念上类似于被动监听事件和主动监听事件的区别。）React 为此提供了一个额外的 [`useLayoutEffect`](https://react.docschina.org/docs/hooks-reference.html#uselayouteffect) Hook 来处理这类 effect。它和 `useEffect` 的结构相同，区别只是调用时机不同。
+
+虽然 `useEffect` 会在浏览器绘制后延迟执行，但会保证在任何新的渲染前执行。React 将在组件更新前刷新上一轮渲染的 effect。
+
+执行 useEffect 时，将 useEffect Hook 添加到 Hook 链表中，然后创建 fiberNode 的 updateQueue，并把本次 effect 添加到 updateQueue 中。
+
+- 对比 useEffect 依赖项是否有改变的底层实现是 `Object.is()`;
+- useEffect 依赖项的作用是决定 effect 是否要执行。这样可以避免重复调用 effect，提升程序执行效率；
+- effect 清除函数即时 effect 中 `return` 的内容。在组件本次渲染中的清除函数会在下一次渲染时才执行；
+- useEffect 的执行流程：组件初次渲染时，在 UI 完成渲染后（DOM 更新完毕）会执行一次 effect；在组件重新渲染时，会对比依赖项在本次渲染和上一次渲染的值/引用是否有发生改变，根据对比结果给 effect 打上相应的 tag，然后等在 UI 渲染完成后，先执行上一次渲染的 effect 清除函数，然后再根据本次 effect 的 tag 来决定是否要执行本次 effect；
+- 在组件销毁之前，会执行上一次渲染的 effect 清除函数
+- 上一次渲染时的 effect 清除函数和本次 effect 放在 UI 渲染完成后才执行的原因是避免了 effect 的执行阻塞 UI 渲染（DOM 更新）
+
+### useContext
+
+```jsx
+const themes = {
+  light: {
+    foreground: "#000000",
+    background: "#eeeeee"
+  },
+  dark: {
+    foreground: "#ffffff",
+    background: "#222222"
+  }
+};
+
+const ThemeContext = React.createContext(themes.light);
+
+function App() {
+  return (
+    <ThemeContext.Provider value={themes.dark}>
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+
+function Toolbar(props) {
+  return (
+    <div>
+      <ThemedButton />
+    </div>
+  );
+}
+
+function ThemedButton() {
+  const theme = useContext(ThemeContext);  
+  return (    
+    <button style={{ background: theme.background, 
+        color: theme.foreground }}>      
+      I am styled by theme context!    
+    </button>  
+  );
+}
+```
+
+### useReducer
+
+```jsx
+// 语法
+const [state, dispatch] = useReducer(reducer, initialArg, init);
+
+// 实例
+const initialState = {count: 0};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+      <button onClick={() => dispatch({type: 'increment'})}>+</button>
+    </>
+  );
+}
+```
+
+### useCallback和useMemo
+
+#### 相同点：
+
+useCallback 和 useMemo 都是性能优化的手段，类似于类组件中的 shouldComponentUpdate，在子组件中使用 shouldComponentUpdate， 判定该组件的 props 和 state 是否有变化，从而避免每次父组件render时都去重新渲染子组件。
+
+#### 区别：
+
+useCallback 和 useMemo 的区别是useCallback返回一个函数，当把它返回的这个函数作为子组件使用时，可以避免每次父组件更新时都重新渲染这个子组件，
+
+```jsx
+const renderButton = useCallback(
+     () => (
+         <Button type="link">
+            {buttonText}
+         </Button>
+     ),
+     [buttonText]    // 当buttonText改变时才重新渲染renderButton
+);
+```
+
+useMemo返回的的是一个值，用于避免在每次渲染时都进行高开销的计算。例：
+
+// 仅当num改变时才重新计算结果
+
+```jsx
+const result = useMemo(() => {
+    for (let i = 0; i < 100000; i++) {
+      (num * Math.pow(2, 15)) / 9;
+    }
+}, [num]);
+```
+
+#### useCallback
+
+```jsx
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+);
+```
+
+把内联回调函数及依赖项数组作为参数传入 `useCallback`，它将返回该回调函数的 memoized 版本，该回调函数仅在某个依赖项改变时才会更新。当你把回调函数传递给经过优化的并使用引用相等性去避免非必要渲染（例如 `shouldComponentUpdate`）的子组件时，它将非常有用。
+
+`useCallback(fn, deps)` 相当于 `useMemo(() => fn, deps)`。
+
+#### useMemo
+
+```jsx
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
+
+把“创建”函数和依赖项数组作为参数传入 `useMemo`，它仅会在某个依赖项改变时才重新计算 memoized 值。这种优化有助于避免在每次渲染时都进行高开销的计算。
+
+记住，传入 `useMemo` 的函数会在渲染期间执行。请不要在这个函数内部执行与渲染无关的操作，诸如副作用这类的操作属于 `useEffect` 的适用范畴，而不是 `useMemo`。
+
+如果没有提供依赖项数组，`useMemo` 在每次渲染时都会计算新的值。
+
+
+
+### useRef
+
+```jsx
+const refContainer = useRef(initialValue);
+```
+
+`useRef` 返回一个可变的 ref 对象，其 `.current` 属性被初始化为传入的参数（`initialValue`）。返回的 ref 对象在组件的整个生命周期内保持不变。
+
+一个常见的用例便是命令式地访问子组件：
+
+```jsxj
+function TextInputWithFocusButton() {
+  const inputEl = useRef(null);
+  const onButtonClick = () => {
+    // `current` 指向已挂载到 DOM 上的文本输入元素
+    inputEl.current.focus();
+  };
+  return (
+    <>
+      <input ref={inputEl} type="text" />
+      <button onClick={onButtonClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+本质上，`useRef` 就像是可以在其 `.current` 属性中保存一个可变值的“盒子”。
+
+你应该熟悉 ref 这一种[访问 DOM](https://react.docschina.org/docs/refs-and-the-dom.html) 的主要方式。如果你将 ref 对象以 `<div ref={myRef} />` 形式传入组件，则无论该节点如何改变，React 都会将 ref 对象的 `.current` 属性设置为相应的 DOM 节点。
+
+然而，`useRef()` 比 `ref` 属性更有用。它可以[很方便地保存任何可变值](https://react.docschina.org/docs/hooks-faq.html#is-there-something-like-instance-variables)，其类似于在 class 中使用实例字段的方式。
+
+这是因为它创建的是一个普通 Javascript 对象。而 `useRef()` 和自建一个 `{current: ...}` 对象的唯一区别是，`useRef` 会在每次渲染时返回**同一个** ref 对象。
+
+请记住，当 ref 对象内容发生变化时，`useRef` 并*不会*通知你。变更 `.current` 属性不会引发组件重新渲染。如果想要在 React 绑定或解绑 DOM 节点的 ref 时运行某些代码，则需要使用[回调 ref](https://react.docschina.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node) 来实现。
+
+## React Router
+
+### 使用 hash 来切换
+
+在进入页面的时候获取当前 url 的 hash 值，根据这个 hash 值去更新 `UI` 从而通过 `showUI()` 来切换到对应的组件
+
+同时添加 onClick 事件点击不同按钮时，就在 url 设置对应的 hash，并切换对应的组件。
+
+这样其实已经满足我们的要求了，如果我在地址栏里输入 `localhost:8080/#login`，就会显示 `<Login/>`。但是这个 “#” 符号不太好看，如果输入 `localhost:8080/login` 就完美了。
+
+### 使用 pathname 切换
+
+如果要做得像上面说的那样，我们只能用 `window.location.pathname` 去修改 url 了。只要把上面代码里的 `hash` 改成 `pathname` 就好了。
+
+### 使用history去切换
+
+幸运的是 H5 提供了一个好用的 [history API](https://developer.mozilla.org/zh-CN/docs/Web/API/History_API)，使用 `window.history.pushState()` 使得我们即可以修改 url 也可以不刷新页面，一举两得。
+
+现在只需要修改点击回调里的 `window.location.pathname = 'xxx'` 就可以了，用 `window.history.pushState()` 去代替。
+
+### 约束
+
+在前端使用路由要有个前提，那就是后端要将全部的路径都指向首页，即 `index.html`。否则后端会出现 404 错误。
+
+什么叫全部路径都指向首页呢？我们想一下正常的多页网页是怎么样的：**如果访问了一个不存在的路径，如 `localhost:8080/fuck.html`，那么后端会返回一个 `error.html`，里面内容显示 “找不到网页”，这种情况就是后端处理网页的路由了。因为正是后端根据不同 url 返回不同的 `xxx.html` 呀。**
+
+如果前端使用路由，那么后端将全部路径都指向 `index.html`。**当我们访问到一个不存在路径时，如 `localhost:8080/fuck`，后端不管三七二十一返回 `index.html`。但是这个 `index.html` 里有我们写的 JS 代码（React 打包后的）呀，这 JS 代码其中就包含了我们做的路由。所以我们的路由发现不存在这个路径时，就切换到 Error 组件来充当 “找不到网页” 的 HTML 文件。这就叫前端控制路由。**
 
 ## Redux
 
@@ -547,92 +967,3 @@ function* fetchUserSaga(action) {
 
 *Redux Thunk*和*Redux Saga*都负责处理副作用。在大多数场景中，Thunk 使用*Promises*来处理它们，而 Saga 使用*Generators*。Thunk 易于使用，因为许多开发人员都熟悉 Promise，Sagas/Generators 功能更强大，但您需要学习它们。但是这两个中间件可以共存，所以你可以从 Thunks 开始，并在需要时引入 Sagas。
 
-
-
-## jquery ajax, Axios, Fetch区别
-
-### jQuery ajax
-
-```js
-$.ajax({
-   type: 'POST',
-   url: url,
-   data: data,
-   dataType: dataType,
-   success: function () {},
-   error: function () {}
-});
-```
-
-是对原生XHR的封装，除此以外还增添了对JSONP的支持。
-
-缺点：
-
-- 本身是针对MVC的编程,不符合现在前端MVVM的浪潮
-- 基于原生的XHR开发，XHR本身的架构不清晰，已经有了fetch的替代方案
-- JQuery整个项目太大，单纯使用ajax却要引入整个JQuery非常的不合理（采取个性化打包的方案又不能享受CDN服务）
-
-### Axios
-
-```js
-axios({
-    method: 'post',
-    url: '/user/12345',
-    data: {
-        firstName: 'Fred',
-        lastName: 'Flintstone'
-    }
-})
-.then(function (response) {
-    console.log(response);
-})
-.catch(function (error) {
-    console.log(error);
-});
-```
-
-Axios本质上也是对原生XHR的封装，只不过它是Promise的实现版本，符合最新的ES规范，从它的官网上可以看到它有以下几条特性：
-
-- 从 node.js 创建 http 请求
-- 支持 Promise API
-- 客户端支持防止CSRF
-- **提供了一些并发请求的接口**（axios.all和axios.spread）
-
-这个支持防止CSRF其实挺好玩的，是怎么做到的呢，就是让你的每个请求都带一个从cookie中拿到的key, 根据浏览器同源策略，假冒的网站是拿不到你cookie中得key的，这样，后台就可以轻松辨别出这个请求是否是用户在假冒网站上的误导输入，从而采取正确的策略。
-
-### Fetch
-
-Fetch API提供了一个JavaScript 接口，用于访问和操纵HTTP 管道的部分，例如请求和响应。
-
-1. 它提供了一个全局的`fetch()`方法，该方法提供了一种简单，合理的方式来跨网络以获取资源。 fetch 是一种 HTTP 数据请求方式，是 XMLHTTPRequest 的一种替代方案。 fetch 不是 ajax 的进一步封装，而是原生 js。 Fetch 函数就是原生 js。
-
-2. 当接收到一个代表错误的HTTP状态码时，从`fetch()`返回的Promise 不会被标记为reject，即使该HTTP相应的状态码是404 或者 500。 相反，它会将Promise状态标记为 resolve,仅当网络故障时或请求被阻止时，才会标记为reject。
-
-3. 默认情况， fetch不会从服务端发送或接受任何cookie，如果站点依赖于用户session，则会导致未经认证的请求。
-4. **response** 这里的response 只是一个HTTP响应，而不是真的JSON。为了获取JSON的内容我们需要使用对应的 .json() 、.text() 、 .blob()方法。
-
-**优缺点：**
-
-- 符合关注分离，没有将输入、输出和用事件来跟踪的状态混在一个对象里。
-- 更加底层，提供了API丰富（request、response）
-- 脱离了XHR，是ES规范里新的实现方式
-- 1. fetch 只对网络请求报错，对400/500 都当成功的请求，需要封装去处理
-- 2. fetch 默认不会带cookie，需要添加配置项
-- 3. etch不支持abort，不支持超时控制，使用setTimeout 及 Promise.reject 的实现的超时控制并不能阻止请求过程继续在后台运行，造成了量的浪费
-- 4. fetch没有办法原生检测请求的进度，而XHR可以
-
- 
-
-## React和Vue相比原生JS有哪些提高
-
-- 不用写一大堆操作 DOM 的代码了，可能提高了工作效率
-
-- 操作 DOM 代码写的不好的话，可能会对性能造成影响
-
-- 框架流行以后，就有人会在这基础上造轮子，比如 UI 框架、组件通信，方便你更快的实现业务
-
-- 这些框架都有虚拟 DOM 的机制，这层机制可以实现跨端
-
-- 1，引入了前端数据流概念，数据和视图分离，数据驱动视图
-
-  2，引入组件化概念，方便复用，方便维护，方便扩展
