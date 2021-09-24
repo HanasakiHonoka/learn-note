@@ -638,7 +638,40 @@ Java内存模型还规定了在执行上述八种基本操作时，必须满足�
 - **`volatile`关键字主要用于解决变量在多个线程之间的可见性，而 `synchronized` 关键字解决的是多个线程之间访问资源的同步性。**
 
 # ThreadLocal
-
+ThreadLocal 并不是一个独立的存在, 它与 Thread 类是存在耦合的, 每个线程都将自己维护一个 ThreadLocal.ThreadLocalMap 类在上下文中; 所以, ThreadLocal 的 set 方法其实是将 target value 放到当前线程的 ThreadLocalMap 中, 而 ThreadLocal 类自己仅仅作为该 target value 所对应的 key：
+## ThreadLocal#set
+```
+ public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+ThreadLocalMap getMap(Thread t) {
+    return t.threadLocals;
+}
+void createMap(Thread t, T firstValue) {
+    t.threadLocals = new ThreadLocalMap(this, firstValue);
+}
+```
+get 方法也是类似的道理, 从线程的 ThreadLocalMap 中获取以当前 ThreadLocal 为 key 对应的 value:
+```
+public T get() { 
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null) { 
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        if (e != null) { 
+            @SuppressWarnings("unchecked")
+            T result = (T)e.value;
+            return result;
+        } 
+    } 
+    return setInitialValue();
+}
+```
 
 # 线程池
 
