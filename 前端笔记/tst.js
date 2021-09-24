@@ -1,20 +1,18 @@
-function printNum(n,m,q,joinArr,swapArr) {
-    let map = new Map();
-    for(let i = 0; i < m; i++) {
-      if(map.has(joinArr[i][0])) {
-        map.set(joinArr[i][0],[...map.get(joinArr[i][0]), joinArr[i][1]]);
-      } else {
-        map.set(joinArr[i][0],[joinArr[i][1]]);
+
+x = [[11,55,23,77],[41,55,21,44],[111,5,43,62],[44,33,49,63],[33,42,92,33]]
+
+
+x.sort((a,b)=>{
+   if(a[0]==b[0]){
+      if(a[1]==b[1]){
+         if(a[2]==b[2]){
+            return  a[3]-b[3]
+         }
+         return a[2]-b[2];
       }
-    }
-    console.log(map.get(1), ' 111111111111')
-    let result = [];
-    for(let i = 1; i <= n; i++) {
-        console.log(map.get(1), ' 111111111111')
-      let length = map.get(i).length;
-      result.push(length);
-    }
-    return result;
-  }
-  let res = printNum(5,5,3,[[1,2],[2,3],[3,4],[4,5],[1,4]],[[2,5],[1,2],[3,4]])
-  console.log(res);
+      return a[1]-b[1];
+   }
+   return a[0]-b[0];
+})
+
+console.log(x)

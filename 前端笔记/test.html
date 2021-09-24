@@ -6,89 +6,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .box1{
-            
-            background-color: blue;
-        }
-        .box2{
-            /* left: -100%; */
-            transform:translateX(100%);
-            position: absolute;
-            background-color: red;
-        }
-        .box{
-            /* width: 100px; */
-            /* height: 50px; */
-            position: absolute;
-            line-height: 50px;
-            white-space: no-warp;
-            /* animation: move 5s infinite linear; */
-        }
-        .content{
-            
-            position: relative;
-            width: 100%;
-            /* animation: move 2s infinite linear; */
-        }
-        .bb{
-            /* width: 100px; */
-            width: 50%;
-            height: 50px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid black; 
-            /* display: flex; */
-        }
-        @keyframes move {
-            from{
-                transform:translateX(0);
-            }
-            to{
-                transform:translateX(-200%);
-            }
-        }
-        .a{
-            border:1px solid blue;
-            /* width: 500px;
-            height: 500px; */
-            position: relative;
-            /* overflow: hidden; */
-        }
-        .b{
-            position: absolute;
-top: 50%;
-left: 50%;
-background-color: #000;
-width:50%;
-height: 50%;
-transform: translate(-50%,-50%);
-            background-color: red;
-        }
+        .main{
+   /* height:200px; */
+   /* position:relative; */
+}
+.left{
+   background: red;
+   height:200px;
+   width:200px;
+   float:left;
+   /* position:absolute;
+   left:0px */
+}
+.right{
+   background: green;
+   height:200px;
+   width:200px;
+   float:right;
+   /* position:absolute;
+   right:0px; */
+}
+.middle{
+   background: blue;
+   height:200px;
+   margin: 0 200px;
+}
+.a{
+       width:100px;
+       height:100px;
+       margin:100px auto;
+       background:red;
+       /* overflow: hidden; */
+    }
+    .b{
+       width:100px;
+       height:100px;
+       margin:100px auto;
+       background:blue;
+       /* overflow: hidden; */
+       /* float:left */
+
+    }
+    .container {
+    /* overflow: hidden;
+    width: 100px;
+    height: 100px;
+    background: lightblue;
+    margin: 100px; */
+    border: 1px solid black;
+}
+p {
+    width: 100px;
+    height: 100px;
+    background: lightblue;
+    margin: 100px;
+}
+.bcon{
+  position: absolute;
+  left:0;
+}
     </style>
 </head>
 <body>
-    <div class="bb">
-        <div class="content">
-            <div class="box box1">一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数</div>
-            <div class="box box2">一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数</div>
-            <!-- <div class="box box1" style="left:-200px"></div> -->
-            
-        </div>
-        <div class="content">
-            <div class="box box1">一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数</div>
-            <div class="box box2">一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数</div>
-            <!-- <div class="box box1" style="left:-200px"></div> -->
-            
-        </div>
-        
-    </div>
-    <!-- <div class="bb" style="border-color: white"> -->
-        <div class="a"> 
-            <div class="b"></div>
-        </div>
-    <!-- </div> -->
-    <button onclick="ajax('http://10.210.107.19:8080/test/domain/get?msg=asdasd')">gogogo</button>
-    <script>
+  <div style="display: flex;">
+    <div style="width: 100px; height: 200px;"></div>
+    <div style="flex: 1; background-color: red; height: 200px;"></div>
+    <div style="width: 100px; height: 200px;"></div>
+  </div>
+   <script>
+    let obj = {
+  name: ""
+};
+let spanName = document.getElementById("spanName");
+let inpName = document.getElementById("inpName");
+let newObj = JSON.parse(JSON.stringify(obj));
+Object.defineProperty(obj,'name',{
+  get() {
+      console.log("enter");
+    return newObj.name;
+  },
+  set(val) {
+    if(val===newObj.name) return;
+    newObj.name = val;
+    observer();
+  }
+})
+function observer() {
+  spanName.innerHTML = obj.name;
+  inpName.value = obj.name;
+}
+inpName.addEventListener("input",function() {
+  obj.name = this.value;
+})
+
+
+
         function ajax(url) {
             return new Promise((resolve,reject)=>{
                 xhr = new XMLHttpRequest();

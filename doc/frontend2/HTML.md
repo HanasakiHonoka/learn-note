@@ -51,7 +51,7 @@ Cross-site request forgery,跨站请求伪造，简单来说就是盗用了你�
 
 跨域解决：
 1. CORS
-​	CORS（跨域资源共享）使用专用的HTTP头，服务器（api.baidu.com）告诉浏览器，特定URL（baidu.com）的ajax请求可以直接使用，不会激活同源策略。让web服务器明确授权非同源页面脚本来访问自身，以Response特定标头Access-Control-*******
+​	CORS（跨域资源共享）使用专用的HTTP头，服务器（api.baidu.com）告诉浏览器，特定URL（baidu.com）的ajax请求可以直接使用，不会激活同源策略。让web服务器明确授权非同源页面脚本来访问自身，以Response特定标头`Access-Control-Allow-Origin`
 2. JSONP
 ​	这个方案相当于黑魔法，因为js调用（实际上是所有拥有src属性的 <\script>、<\img>、<\iframe>）是不会经过同源策略，例如baidu.com引用了CDN的jquery。所以我通过调用js脚本的方式，从服务器上获取JSON数据绕过同源策略。
 
@@ -62,12 +62,87 @@ Cross-site request forgery,跨站请求伪造，简单来说就是盗用了你�
 
 
 
-3. nginx反向代理 
+3. 正向代理 
    当你访问```baidu.com/api/login```的时候，通过在```baidu.com```的nginx服务器会识别你是api下的资源，会自动代理到```api.baidu.com/login```，浏览器本身是不知道我实际上是访问的```api.baidu.com```的数据，和前端资源同源，所以也就不会触发浏览器的同源策略。
 
 4. iframe实现
    
     https://mp.weixin.qq.com/s?__biz=MzUxNjQ1NjMwNw==&mid=2247484470&idx=1&sn=c00f03c3bb7506cb87c68ab22e1cc338&chksm=f9a66e2aced1e73c04ab7e5d9e63ca8b969d22611e00f232411487aabc99e37dd4c4d46e6440&token=1976933310&lang=zh_CN#rd
+
+    现在我启动了两个服务
+
+1、localhost:3001 下有  a.html 和 c.html
+
+a.html 是内容页，需要使用数据的终端页（以下简称A）
+
+c.html 是辅助页（以下简称C）
+
+2、localhost:3002 下有 b.html
+
+b.html 也是辅助页，用于请求数据（以下简称B）
+
+
+
+内容页 A
+
+在 A 中，使用 iframe 嵌入了 B，并且全局设置了一个函数 getData
+
+这个函数的作用是，为了给 C页面调用，传入接口的数据的
+
+```html
+<body>
+    我是A页面
+    <script>
+        window.getData=function(data){            
+
+            console.log("获取到数据",data)
+
+        }    
+
+    </script>
+
+    <iframe src="http://localhost:3002/b.html" ></iframe>
+
+</body>
+```
+
+辅助页 B 
+
+B 页面当然是用于请求接口了，这里使用 定时器模拟接口，请求成功后跳转到 C
+
+```html
+<body>
+
+    我是B页面
+    <script>
+        console.log("B页面开始请求接口")
+
+        setTimeout(function(){            
+
+            window.name="我是B页面保存的数据"
+
+            location.href="http://localhost:3001/c.html"
+        },2000)    
+
+    </script>
+
+</body>
+```
+
+辅助页 C 
+
+B 请求完，跳到C 之后，C 拿到 window.name，然后调用 A 的方法 getData，并且把数据传过去
+
+```html
+<body>
+    我是C页面
+    <script>// 调用页面A 的方法，并把 name 传过去
+        parent.getData(window.name)    
+
+    </script>
+
+</body>
+```
    
 
 ### 浏览器缓存机制
