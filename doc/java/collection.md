@@ -47,6 +47,22 @@ putAll 批量插入或者插入节点后发现存在链表长度达到 8 个或�
 ```
 sizeCtl为扩容的阈值。sizeCtl默认的情况下等于0，对ConcurrentHashMap进行初始化的时候会对sizeCtl减1，初始化成功后将sizeCtl改为阈值（最大长度*0.75）。
 
+#### sizeCtl属性在各个阶段的作用
+（1）新建而未初始化时
+作用：sizeCtl 用于记录初始容量大小，仅用于记录集合在实际创建时应该使用的大小的作用 。
+
+（2）初始化过程中
+作用：将 sizeCtl 值设置为 -1 表示集合正在初始化中，其他线程发现该值为 -1 时会让出CPU资源以便初始化操作尽快完成 。
+
+（3）初始化完成后
+作用：sizeCtl 用于记录当前集合的负载容量值，也就是触发集合扩容的极限值 。
+
+（4）正在扩容时
+作用：sizeCtl 用于记录当前扩容的并发线程数情况，此时 sizeCtl 的值为：((rs << RESIZE_STAMP_SHIFT) + 2) + (正在扩容的线程数) ，并且该状态下 sizeCtl < 0 。
+
+
+
+
 #### resizeStamp()
 ```
 private static int RESIZE_STAMP_BITS = 16;
@@ -69,7 +85,16 @@ sc >= 0
 表示没有线程在扩容，使用CAS将sizeCtl的值改为(rs << RESIZE_STAMP_SHIFT) + 2)。
 rs即resizeStamp(n)，记temp=rs << RESIZE_STAMP_SHIFT。如当前容量为8时rs的值：
 
+#### transfer()重要
+jdk1.8版本的ConcurrentHashMap支持并发扩容，transfer方法是真正进行扩容的函数。
 
+调用该扩容方法的地方有：
+
+（1）java.util.concurrent.ConcurrentHashMap#addCount 向集合中插入新数据后更新容量计数时发现到达扩容阈值而触发的扩容
+
+（2）java.util.concurrent.ConcurrentHashMap#helpTransfer 扩容状态下其他线程对集合进行插入、修改、删除、合并、compute 等操作时遇到 ForwardingNode 节点时触发的扩容
+
+（3）java.util.concurrent.ConcurrentHashMap#tryPresize putAll批量插入或者插入后发现链表长度达到8个或以上，但数组长度为64以下时触发的扩容
 
 
 
