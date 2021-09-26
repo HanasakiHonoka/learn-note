@@ -9,6 +9,70 @@
 - `Hashtable`： 数组+链表组成的，数组是 `Hashtable` 的主体，链表则是主要为了解决哈希冲突而存在的
 - `TreeMap`： 红黑树（自平衡的排序二叉树） 
 
+## 关于ConcurrentHashMap
+### put（）的简单总结
+①先传入一个k和v的键值对，不可为空（HashMap是可以为空的），如果为空就直接报错。
+
+②接着去判断table是否为空，如果为空就进入初始化阶段。
+
+③如果判断数组中某个指定的桶是空的，那就直接把键值对插入到这个桶中作为头节点，而且这个操作不用加锁。
+
+④如果这个要插入的桶中的hash值为-1，也就是MOVED状态（也就是这个节点是forwordingNode），那就是说明有线程正在进行扩容操作，那么当前线程就进入协助扩容阶段。
+
+⑤需要把数据插入到链表或者树中，如果这个节点是一个链表节点，那么就遍历这个链表，如果发现有相同的key值就更新value值，如果遍历完了都没有发现相同的key值，就需要在链表的尾部插入该数据。插入结束之后判断该链表节点个数是否大于8，如果大于就需要把链表转化为红黑树存储。
+
+⑥如果这个节点是一个红黑树节点，那就需要按照树的插入规则进行插入。
+
+⑦put结束之后，需要给map已存储的数量+1，在addCount方法中判断是否需要扩容
+
+### 扩容
+#### 什么时候会扩容
+当往hashMap中成功插入一个key/value节点时，有两种情况可能触发扩容动作：
+1、如果新增节点之后，所在链表的元素个数达到了阈值 8，则会调用treeifyBin方法把链表转换成红黑树，不过在结构转换之前，会对数组长度进行判断，实现如下：如果数组长度n小于阈值MIN_TREEIFY_CAPACITY，默认是64，则会调用tryPresize方法把数组长度扩大到原来的两倍，并触发transfer方法，重新调整节点的位置。
+
+2、调用put方法新增节点时，在结尾会调用addCount方法记录元素个数，并检查是否需要进行扩容，当数组元素个数达到阈值时，会触发transfer方法，重新调整节点的位置。
+
+扩容状态下其他线程对集合进行插入、修改、删除、合并、compute 等操作时遇到 ForwardingNode 节点会触发扩容 。
+
+putAll 批量插入或者插入节点后发现存在链表长度达到 8 个或以上，但数组长度为 64 以下时会触发扩容 。
+
+注意：桶上链表长度达到 8 个或者以上，并且数组长度为 64 以下时只会触发扩容而不会将链表转为红黑树 。
+```
+   if (check >= 0) {
+       Node<K,V>[] tab, nt; int n, sc;
+       //s是当前元素的个数
+       while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
+              (n = tab.length) < MAXIMUM_CAPACITY) {
+
+```
+sizeCtl为扩容的阈值。sizeCtl默认的情况下等于0，对ConcurrentHashMap进行初始化的时候会对sizeCtl减1，初始化成功后将sizeCtl改为阈值（最大长度*0.75）。
+
+#### resizeStamp()
+```
+private static int RESIZE_STAMP_BITS = 16;
+
+private static final int RESIZE_STAMP_SHIFT = 32 - RESIZE_STAMP_BITS;
+
+static final int resizeStamp(int n) {
+        return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
+}
+```
+
+resizeStamp(n)的返回值为：高16位置0，第16位为1，低15位存放当前容量n，用于表示是对n的扩容。
+
+rs与RESIZE_STAMP_SHIFT配合可以求出新的sizeCtl的值，分情况如下：
+
+sc < 0
+已经有线程在扩容，将sizeCtl+1并调用transfer()让当前线程参与扩容。
+
+sc >= 0
+表示没有线程在扩容，使用CAS将sizeCtl的值改为(rs << RESIZE_STAMP_SHIFT) + 2)。
+rs即resizeStamp(n)，记temp=rs << RESIZE_STAMP_SHIFT。如当前容量为8时rs的值：
+
+
+
+
+
 ## HashMap 和 Hashtable 的区别
 
 1. **线程是否安全：** `HashMap` 是非线程安全的，`HashTable` 是线程安全的,因为 `HashTable` 内部的方法基本都经过`synchronized` 修饰。（如果你要保证线程安全的话就使用 `ConcurrentHashMap` 吧！）；
