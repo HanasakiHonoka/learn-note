@@ -2,7 +2,15 @@
 
 ### 基本数据类型和引用数据类型
 
-基本类型：Number、String 、Boolean、Null、Undefined和Symbol
+基本类型：Number、String 、Boolean、Null、Undefined和Symbol，
+
+ BigInt（**任意精度整数**）（ES10）
+
+**对此数据类型存在进行简单解释**
+BigInt 通过数字加n的方法来表示，支持二进制，八进制，十六进制
+*以下写法结果均为转换为字符串后得而结果，BigInt类型转换字符串后不会再带着n*
+
+十进制：10n （10）  十六进制： 0x10n  （16）  八进制： 0o10n （8）
 
 引用类型：对象类型Object type，比如：Object 、Array 、Function 、Data等。
 
@@ -687,7 +695,7 @@ function toThousands(num) {
 
 1.**转换成字符串**
 
-![img](https://upload-images.jianshu.io/upload_images/14976946-afd1f47fe1964d91.png)
+![429LdK.png](https://z3.ax1x.com/2021/09/27/429LdK.png)
 
 对象类型，先将对象类型转换成基本类型
 
@@ -777,6 +785,24 @@ var a={
 
 ### 为什么0.1 + 0.2 > 0.3
 
+#### IEEE 754 组成
+
+![[公式]](https://www.zhihu.com/equation?tex=FloatPoinNum+%3D+%28-1%29%5E%7BS%7D%5Ctimes%281.M%29%5Ctimes2%5E%7BE%7D)
+
+其中，S表示符号，1表示负数，0表示正数；M表示尾数部分；E表示阶码。
+
+32位精度：
+
+1位符号位+8位指数位+23位尾数部分
+
+64位精度：
+
+1位符号位+11位指数位+52位尾数部分
+
+其中，符号位使用阶码表示，尾数部分使用补码表示。
+
+注意：尾数部分表示1.xxxx,在符号位与尾数中间有个隐藏的 "1."被省略了。
+
 我们都知道，计算机用位来储存及处理数据。每一个二进制数（二进制串）都一一对应一个十进制数。
 
 ##### 计算机内部如何表示小数
@@ -790,7 +816,11 @@ var a={
 
 关于十进制与二进制间如何转换，这里不细说，直接给出结论：
 
-**十进制整数转二进制方法：除2取余；十进制小数转二进制方法：乘2除整**
+**十进制整数转二进制方法：除2取余；**
+
+**十进制小数转二进制方法：乘2除整**
+
+
 
 **如何用二进制表示0.1**
 
@@ -817,9 +847,34 @@ var a={
 
 整数是完全精度的，不存在舍入误差。例如，一些关于人民币的运算，都会以分为基本单位，计算采用分，展示再转换成元。当然，这样也有一些问题，会带来额外的工作量，如果那天人民币新增了一个货币单位，对系统的扩展性也会有考验。
 
-2. **使用bignumber进行运算**
+2. **使用bignumber.js进行运算**
 
+3. 对于计算，我们可以使用`toFixed`来处理`toFixed`是用来强制保留小数点后面的位数，可以用于大多数精度要求不是非常高的计算中
 
+   ```js
+   (0.1 + 0.2).toFixed(2) // 0.30
+   ```
+
+4. 最常见的方法是设置一个误差范围值， 通常称为“机器精度”（machine epsilon） ， 对`JavaScript`的数字来说，这个值通常是 `2^-52 (2.220446049250313e-16)` 。
+
+   可以使用 `Number.EPSILON`来比较两个数字是否相等（在指定的误差范围内）
+
+### 为什么typeof null === 'object'?
+
+在 javascript 的最初版本中，使用的 32 位系统，为了性能考虑使用低位存储了变量的类型信息
+
+- 000：对象
+- 1：整数
+- 010：浮点数
+- 100：字符串
+- 110：布尔
+
+有 2 个值比较特殊：
+
+- undefined：用 -2^{30} （−2^30）表示。
+- null：对应机器码的 NULL指针，一般是全零。
+
+在 ES6 中曾有关于修复此 bug 的提议，提议中称应该让 **typeof null==='null'**但是该提议被无情的否决了，自此 typeofnull终于不再是一个 bug，而是一个 feature，并且永远不会被修复。
 
 ### 闭包
 
@@ -858,6 +913,7 @@ arr_flat = arr.flat(Infinity);
 
 ```js
 ary = str.replace(/[\[\]]/g, '').split(',');
+// ary = ["1", "2", "3", "4", "5", "6"]
 ```
 
 **第二种处理**
@@ -866,6 +922,7 @@ ary = str.replace(/[\[\]]/g, '').split(',');
 str = str.replace(/[\[\]]/g, '');
 str = '[' + str + ']';
 ary = JSON.parse(str);
+// ary = [1, 2, 3, 4, 5, 6]
 ```
 
 **第三种处理：递归处理**
@@ -902,6 +959,30 @@ while (ary.some(Array.isArray)) {
   ary = [].concat(...ary);
 }
 ```
+
+### 对象扁平化
+
+```js
+function flattenObject(obj) {
+  let resObj = {};
+  function fn(obj, resObj, prev) {
+    Object.keys(obj).forEach((key) => {
+      let newKey = prev + key;
+      if (typeof obj[key] !== 'object') {
+        resObj[newKey] = obj[key];
+      } else {
+        newKey += ".";
+        fn(obj[key], resObj, newKey);
+      }
+    });
+  }
+  f(obj, resObj, "");
+  return JSON.stringify(resObj);
+}
+
+```
+
+
 
 ### ES6 Symbol
 
