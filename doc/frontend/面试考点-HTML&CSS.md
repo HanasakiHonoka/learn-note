@@ -393,3 +393,151 @@ offsetHeitht = height + 上下padding + 上下boder
   点击位置距离当前电脑屏幕的x，y坐标
 - x、y
   和screenX、screenY一样
+
+### box-shadow
+
+```
+box-shadow: *h-shadow v-shadow blur spread color* inset;
+```
+
+| *h-shadow* | 必需的。水平阴影的位置。允许负值                             |
+| ---------- | ------------------------------------------------------------ |
+| *v-shadow* | 必需的。垂直阴影的位置。允许负值                             |
+| *blur*     | 可选。模糊距离                                               |
+| *spread*   | 可选。阴影的大小                                             |
+| *color*    | 可选。阴影的颜色。在[CSS颜色值](https://www.runoob.com/cssref/css_colors_legal.aspx)寻找颜色值的完整列表 |
+| inset      | 可选。从外层的阴影（开始时）改变阴影内侧阴影                 |
+
+
+
+### 0.5px 细线边框的原理和实现方式
+
+​		细线边框的具体实现方法有：伪元素缩放或渐变，box-shadow模拟，svg画线，border-image裁剪等。要实现小于1px的线条，有个先决条件：屏幕的分辨率要足够高，设备像素比要大于1，即css中的1个像素对应物理屏幕中1个以上的像素点。
+
+　　对于普通电脑，屏幕物理像素和css像素一一对应，显示的最小单位就是1px。而现在的手机，屏幕物理宽度一般都大于页面显示宽度。例如苹果6s的屏幕分辨率为1334x750像素，但是以375px的宽度显示页面，设备像素比就是750/375=2；此时在css中定义0.5px的宽度，实际上对应物理屏幕的1个像素点，这就是border小于1px的的实现基础。
+
+#### 一、缩放biefore/after伪元素
+
+　　伪元素进行绝对定位，background着色要优于border着色，适合画单线条
+
+```css
+<div class="fineLine"></div>
+<!-- fineLine的:before为上边框，:after为下边框 -->
+<style type="text/css">
+.fineLine {
+    position: relative;
+}
+.fineLine:before,.fineLine:after{
+  position: absolute;
+  content: " ";
+  height: 1px;
+  width: 100%;
+  left: 0;
+  transform-origin: 0 0;
+  -webkit-transform-origin: 0 0;
+}
+.fineLine:before {
+    top: 0;
+    background: #000;
+}
+.fineLine:after {
+    bottom: 0;
+    border-bottom: 1px solid #000;
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+    .fineLine:after,.fineLine:before {
+        -webkit-transform: scaleY(.667);
+    }
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+    .fineLine:after,.fineLine:before {
+        -webkit-transform: scaleY(.5);
+    }
+}
+</style>
+```
+
+#### 二、box-shadow模拟
+
+　　box-shaodw适合模拟box四周都需要细线border的情况，而且支持border-radius。此例中演示的是dppx鉴别：
+
+```css
+<div class="fineLine"></div>
+
+<style type="text/css">
+.fineLine {
+    box-shadow: 0 0 0 1px;
+}
+@media (min-resolution: 2dppx) {
+    .fineLine {
+        box-shadow: 0 0 0 0.5px;
+    }
+}
+@media (min-resolution: 3dppx) {
+    .fineLine {
+        box-shadow: 0 0 0 0.33333333px;
+    }
+}
+</style>
+```
+
+#### 三、采用meta viewport的方式
+
+```HTML
+<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5"/>
+这样子就能缩放到原来的0.5倍，如果是1px那么就会变成0.5px
+```
+
+要记得viewport只针对于移动端，只在移动端上才能看到效果
+
+### CSS文本省略号显示
+
+文本省略号是非常常见的需求，而省略号展示又通常分为俩种情况折行和不折行。
+
+不折行：
+
+```css
+div {  
+  white-space:nowrap;/* 规定文本是否折行 */  
+  overflow: hidden;/* 规定超出内容宽度的元素隐藏 */
+  text-overflow: ellipsis;
+  /* 规定超出的内容文本省略号显示，通常跟上面的属性连用，因为没有上面的属性不会触发超出规定的内容 */
+}
+
+white-space
+
+值	描述
+normal	默认。空白会被浏览器忽略。
+pre	空白会被浏览器保留。其行为方式类似 HTML 中的 <pre> 标签。
+nowrap	文本不会换行，文本会在在同一行上继续，直到遇到 <br> 标签为止。
+pre-wrap	保留空白符序列，但是正常地进行换行。
+pre-line	合并空白符序列，但是保留换行符。
+inherit	规定应该从父元素继承 white-space 属性的值。
+
+overflow
+
+visible	默认值。内容不会被修剪，会呈现在元素框之外。
+hidden	内容会被修剪，并且其余内容是不可见的。
+scroll	内容会被修剪，但是浏览器会显示滚动条以便查看其余的内容。
+auto	如果内容被修剪，则浏览器会显示滚动条以便查看其余的内容。
+inherit	规定应该从父元素继承 overflow 属性的值。
+
+text-overflow
+
+clip	修剪文本。	
+ellipsis	显示省略符号来代表被修剪的文本。
+string	使用给定的字符串来代表被修剪的文本。
+```
+
+折行：
+
+```css
+div {      
+  overflow: hidden;      
+  text-overflow: ellipsis;      
+  display: -webkit-box; /* 将对象作为弹性伸缩盒子模型显示 */      
+  -webkit-line-clamp: 4; /* 控制最多显示几行 */      
+  -webkit-box-orient: vertical; /* 设置或检索伸缩盒对象的子元素的排列方式 */    
+}
+```
+
