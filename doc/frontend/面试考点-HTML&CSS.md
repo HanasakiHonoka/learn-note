@@ -333,3 +333,63 @@ z-index 属性设置元素的堆叠顺序。拥有更高堆叠顺序的元素总
 }
 ```
 
+
+
+### 一张图搞懂clientWidth,offsetWidth,scrollHeight
+
+![44Q4JO.png](https://z3.ax1x.com/2021/09/29/44Q4JO.png)
+
+![44896e.png](https://z3.ax1x.com/2021/09/29/44896e.png)
+
+下面介绍一下每个字段的含义
+
+- clientLeft,clientTop
+  表示内容区域的左上角相对于整个元素左上角的位置（包括边框）。(取决于边框的像数值。
+
+ clientTop = boder.top(上边框的宽度)
+
+ clientLeft = boder.left(左边框的宽度)
+
+- clientWidth,clientHeight
+  内容区域的宽高，不包括边框宽度值。
+
+clientWidth = width+左右padding
+
+clientHeight = height + 上下padding 
+
+- clientX、clientY
+  点击位置距离当前body可视区域的x，y坐标 
+
+- offsetLeft,offsetTop
+  相对于最近的祖先定位元素。
+
+offsetTop：当前元素 上边框 外边缘 到 最近的已定位父级（offsetParent） 上边框内边缘的距离。如果父
+
+​         级都没有定位，则分别是到body 顶部和左边的距离
+
+offsetLeft: 同理
+
+- offsetParent
+  某元素的父元素 
+
+那么offsetParent就是距离该子元素最近的进行过定位的父元素（position：absolute  relative fixed），如果其父元素中不存在定位则offsetParent为：body元素
+
+- offsetWidth,offsetHeight
+  整个元素的尺寸(不包括因为滚动条变宽的宽度，包括滚动条的宽度和高度)
+
+offsetWidth = width + 左右padding + 左右boder
+
+offsetHeitht = height + 上下padding + 上下boder
+
+- offsetX, offsetY
+  相对于带有定位的父盒子的x，y坐标
+- scrollLeft,scrollTop
+  元素滚动的距离大小，内容层顶部/左侧 到 可视区域顶部/左侧的距离
+- scrollWidth,scrollHeight
+  整个内容区域的宽度(包括需拉动滚动条隐藏起来的那些部分) scrollWidth = scrollTop+clientWidth
+- pageX、pageY
+  对于整个页面来说，包括了被卷去的body部分的长度
+- screenX、screenY
+  点击位置距离当前电脑屏幕的x，y坐标
+- x、y
+  和screenX、screenY一样
