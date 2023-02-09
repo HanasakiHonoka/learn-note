@@ -11,7 +11,7 @@ jobs:
         uses: wlixcc/SFTP-Deploy-Action@v1.0
         with:
           username: 'root'
-          server: '106.54.68.249'
+          server: '47.241.246.150'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }} 
           local_path: './doc/*'
           remote_path: '/home/doc'
@@ -19,15 +19,15 @@ jobs:
       - name: nginx reload
         uses: appleboy/ssh-action@master
         with:
-          host: "106.54.68.249"
+          host: "47.241.246.150"
           username: "root"
           password: ${{ secrets.PASSWORD }}
           port: 22
           script: "/usr/local/nginx/sbin/nginx -s reload"
-      - name: 'Send Message to Wechat'
-        uses: HollowMan6/Wechat-Timed-Message@main
-        with:
-          PPTOKEN: ${{ secrets.PPTOKEN }}
-          PPTOPIC: ${{ secrets.PPTOPIC }}
-          TITLE: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
-          MSG: ${{ github.event.commits[0].message }}
+      # - name: 'Send Message to Wechat'
+      #   uses: HollowMan6/Wechat-Timed-Message@main
+      #   with:
+      #     PPTOKEN: ${{ secrets.PPTOKEN }}
+      #     PPTOPIC: ${{ secrets.PPTOPIC }}
+      #     TITLE: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
+      #     MSG: ${{ github.event.commits[0].message }}
