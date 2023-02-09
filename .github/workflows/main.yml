@@ -8,14 +8,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: deploy file
-        uses: wlixcc/SFTP-Deploy-Action@v1.0
+        uses: zhenyuWang/Upload-File-Action@v1.0.1
         with:
           username: 'root'
           server: '47.241.246.150'
+          port: "22"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }} 
           local_path: './doc/*'
-          remote_path: '/home/doc'
-          args: '-o ConnectTimeout=5'
+          target_path: '/home/doc'
       - name: nginx reload
         uses: appleboy/ssh-action@master
         with:
