@@ -28,13 +28,13 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           # Required mail server address if not connection_url:
-          server_address: smtp.qq.com
+          server_address: smtp.gmail.com
           # Server port, default 25:
           server_port: 465
           # Optional whether this connection use TLS (default is true if server_port is 465)
           secure: true
           # Optional (recommended) mail server username:
-          username: 467361472@qq.com
+          username: yamadamiyu51@gmail.com
           # Optional (recommended) mail server password:
           password: ${{secrets.MAIL_PASSWORD}}
           # Required mail subject:
