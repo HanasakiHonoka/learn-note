@@ -24,6 +24,27 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: 22
           script: "/usr/local/nginx/sbin/nginx -s reload"
+          - name: Send mail
+  uses: dawidd6/action-send-mail@v3
+  with:
+    # Required mail server address if not connection_url:
+    server_address: smtp.qq.com
+    # Server port, default 25:
+    server_port: 465
+    # Optional whether this connection use TLS (default is true if server_port is 465)
+    secure: true
+    # Optional (recommended) mail server username:
+    username: 467361472@qq.com
+    # Optional (recommended) mail server password:
+    password: ${{secrets.MAIL_PASSWORD}}
+    # Required mail subject:
+    subject: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
+    # Required recipients' addresses:
+    to: hsjjer@163.com
+    # Required sender full name (address can be skipped):
+    from: 467361472@qq.com # <user@example.com>
+    # Optional plain body:
+    body: Build job of ${{github.repository}} completed successfully! ${{ github.event.commits[0].message }}
       # - name: 'Send Message to Wechat'
       #   uses: HollowMan6/Wechat-Timed-Message@main
       #   with:
