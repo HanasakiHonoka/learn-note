@@ -40,11 +40,11 @@ jobs:
           # Required mail subject:
           subject: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
           # Required recipients' addresses:
-          to: 2019140718@bupt.cn,2019140722@bupt.cn,2019140728@bupt.cn,yiyang@bupt.edu.cn
+          to: 2019140718@bupt.cn,2019140722@bupt.cn,2019140728@bupt.cn,yiyang@bupt.edu.cn,839265345@qq.com,yangyionly@qq.com
           # Required sender full name (address can be skipped):
           from: learn-note-bot # <user@example.com>
           # Optional plain body:
-          body: commit msg \n ${{ github.event.commits[0].message }}
+          body: 变更信息：${{ github.event.commits[0].message }}
       # - name: 'Send Message to Wechat'
       #   uses: HollowMan6/Wechat-Timed-Message@main
       #   with:
