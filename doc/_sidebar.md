@@ -12,6 +12,7 @@
   * [JVM](java/jvm)
   * [多线程](java/multiThread)
   * [设计模式](java/designModel)
+  * [其他](java/other)
 * [**框架**](framework/)
   * [Spring](framework/spring)
   * [SpringMVC](framework/springmvc)
