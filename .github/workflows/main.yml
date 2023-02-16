@@ -40,7 +40,7 @@ jobs:
           # Required mail subject:
           subject: ${{ github.event.commits[0].author.name }}更新了${{ github.event.repository.name }}
           # Required recipients' addresses:
-          to: 2019140718@bupt.cn,2019140722@bupt.cn,2019140728@bupt.cn,839265345@qq.com,yangyionly@qq.com
+          to: ${{ secrets.SEND_EMAIL }}
           # Required sender full name (address can be skipped):
           from: learn-note-bot # <user@example.com>
           # Optional plain body:
