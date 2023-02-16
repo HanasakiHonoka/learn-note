@@ -44,7 +44,8 @@ jobs:
           # Required sender full name (address can be skipped):
           from: learn-note-bot # <user@example.com>
           # Optional plain body:
-          body: 变更信息：${{ github.event.commits[0].message }}
+          html_body: 变更信息：<br> ${{ github.event.commits[0].message }} <br> 地址：http://note.hanasaki.top
+          convert_markdown: true
       # - name: 'Send Message to Wechat'
       #   uses: HollowMan6/Wechat-Timed-Message@main
       #   with:
