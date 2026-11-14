@@ -141,12 +141,12 @@ Java语言的Thread类中曾经提供了一个stop()方法，用来终止线程�
 **如何理解两阶段终止模式**
 前辈们经过认真对比分析，已经总结出了一套成熟的方案，叫做两阶段终止模式。顾名思义，就是将终止过程分成两个阶段，其中第一个阶段主要是线程T1向线程T2发送终止指令，而第二阶段则是线程T2响应终止指令。
 
-![](https://img-blog.csdnimg.cn/20200423194952640.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/77f52e5afa298f72fade.png)
 
 那在Java语言里，终止指令是什么呢？这个要从Java线程的状态转换过程说起。之前曾经提到过Java线程的状态转换图，如下图所示。
-![](https://img-blog.csdnimg.cn/2020042319503594.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/3f2880bdff14d966e52d.png)
 
-![](https://img-blog.csdnimg.cn/2020042319525490.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/704168289890845f39a1.png)
 
 从这个图里你会发现，Java线程进入终止状态的前提是**线程进入RUNNABLE状态**，而实际上线程也可能处在休眠状态，也就是说，我们要想终止一个线程，首先要把线程的状态从休眠状态转换到RUNNABLE状态。如何做到呢？这个要靠Java Thread类提供的`interrupt()`方法，它可以将休眠状态的线程转换到RUNNABLE状态。
 
@@ -159,7 +159,7 @@ Java语言的Thread类中曾经提供了一个stop()方法，用来终止线程�
 **用两阶段终止模式终止监控操作**
 实际工作中，有些监控系统需要动态地采集一些数据，一般都是监控系统发送采集指令给被监控系统的监控代理，监控代理接收到指令之后，从监控目标收集数据，然后回传给监控系统，详细过程如下图所示。出于对性能的考虑（有些监控项对系统性能影响很大，所以不能一直持续监控），动态采集功能一般都会有终止操作。
 
-![](https://img-blog.csdnimg.cn/20200423200603300.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/93ade156d155987a0a3c.png)
 
 下面的示例代码是监控代理简化之后的实现，start()方法会启动一个新的线程rptThread来执行监控数据采集和回传的功能，stop()方法需要优雅地终止线程rptThread，那stop()相关功能该如何实现呢？
 
@@ -302,9 +302,9 @@ shutdown()方法是一种很保守的关闭线程池的方法。线程池执行s
 
 其实分析完shutdown()和shutdownNow()方法你会发现，它们实质上使用的也是两阶段终止模式，只是终止指令的范围不同而已，前者只影响阻塞队列接收任务，后者范围扩大到线程池中所有的任务。
 
-![](https://img-blog.csdnimg.cn/20200423201625463.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/56df17df9868411c4187.png)
 
-![](https://img-blog.csdnimg.cn/2020042320164146.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzcxOTAxNQ==,size_16,color_FFFFFF,t_70)
+![](../assets/images/0f67b1877a3b4303951c.png)
 
 **总结**
 两阶段终止模式是一种应用很广泛的并发设计模式，在Java语言中使用两阶段终止模式来优雅地终止线程，需要注意两个关键点：一个是仅检查终止标志位是不够的，因为线程的状态可能处于休眠态；另一个是仅检查线程的中断状态也是不够的，因为我们依赖的第三方类库很可能没有正确处理中断异常。
@@ -424,11 +424,11 @@ synchronized不论是修饰代码块还是修饰方法都是通过持有对象�
 
 我们都知道对象是放在堆内存中的，对象大致可以分为三个部分，分别是对象头，实例变量和填充字节，对象头分成两个部分：mark word和 klass word
 
-![](https://img-blog.csdnimg.cn/20200607162641389.png)
+![](../assets/images/bbb0cd0ed37e44c3259a.png)
 
 其中32位虚拟机 对象头的Mark word为：
 
-![](https://img-blog.csdnimg.cn/20200607162652429.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/6049a51531aa9ec13737.png)
 
 锁的类型和状态在对象头Mark Word中都有记录。在申请锁、锁升级等过程中JVM都需要读取对象的Mark Word数据。对于重量级锁对象的markword包含两个部分：指向重量级锁的指针和标志位
 
@@ -452,7 +452,7 @@ ObjectMonitor() {
 
 每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（重量级）之后，该对象头的Mark Word 中就被设置指向 Monitor 对象的指针
 
-![](https://img-blog.csdnimg.cn/20200607162707766.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/9be9ec8ad90678246334.png)
 
 1. synchronized无论是加在同步代码块还是方法上，效果都是加在对象上，其原理都是对一个对象上锁
 2. 如何给这个obj上锁呢？当一个线程Thread-1要执行临界区的代码时，首先会通过obj对象的markword指向一个monitor锁对象
@@ -581,21 +581,21 @@ public static void method2() {
 ```
 
 1. 创建锁记录（Lock Record）对象，每个线程的栈帧中都会存放一个锁记录的结构，这个锁记录内部存储的是obj对象的markword。
-![](https://img-blog.csdnimg.cn/20200607162746164.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/3bb5d04d2c645f542636.png)
 
 2. 让锁记录中的Object reference指向锁对象，并尝试使用CAS(compare and swap) 替换obj的markword，将markword的值存入锁记录中：
-![](https://img-blog.csdnimg.cn/2020060716275865.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/c11abfe6708d14465757.png)
 
 3. 如果CAS交换成功，对象头中就存放了Thread-0栈帧中的锁记录地址和状态00，表示这时由该线程对对象加锁，如图：
-![](https://img-blog.csdnimg.cn/20200607162813468.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/4320d3972a5a4af7ce2a.png)
 
 4. 如果CAS失败，有两种情况：
 如果是其它线程已经持有了该 Object 的轻量级锁，这时表明有竞争，进入锁膨胀过程
 如果是自己执行了 synchronized 锁重入，那么再添加一条 Lock Record 作为重入的计数
-![](https://img-blog.csdnimg.cn/20200607162825808.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/663b54e490af56eab060.png)
 
 5. 当退出 synchronized 代码块（解锁时）如果有取值为 null 的锁记录，表示有重入，这时重置锁记录，表示重入计数减 一。
-![](https://img-blog.csdnimg.cn/20200607162837903.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/fe3268fa81f280bff870.png)
 
 6. 当退出synchronized代码块（解锁时）锁记录的值不为null，这时使用CAS将markword的值恢复给obj的对象头。成功就说明解锁成功，失败说明轻量级锁进入了锁膨胀已经升级为了重量级锁，进入重量级锁解锁流程
 
@@ -612,7 +612,7 @@ public static void method1() {
 }
 ```
 1. 当Thread-1对对象obj加轻量级锁时，Thread-0已经对该对象加了轻量级锁
-![](https://img-blog.csdnimg.cn/20200607162852775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
+![](../assets/images/c81d9e8a0933ad106903.png)
 
 2. 这是Thread-1加轻量级锁失败，进入锁膨胀流程，即为obj对象申请Monitor锁，让obj指向重量级锁地址，然后自己进入monitor的EntryList阻塞：
 !(https://img-blog.csdnimg.cn/20200607162904966.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzY0NDY4,size_16,color_FFFFFF,t_70)
@@ -1129,7 +1129,7 @@ public class ThreadPoolTest {
     }
 ```
 
-![](https://img-blog.csdnimg.cn/2018122411100636)
+![](../assets/images/0a72943ca12bb0df8f1c.png)
 
 
 ## java线程池的调优以及监控

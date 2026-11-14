@@ -2,7 +2,7 @@
 # 设计模式
 
 # 设计模式分类
-![](https://img-blog.csdnimg.cn/20200411190730722.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzEyMjA5MA==,size_16,color_FFFFFF,t_70)
+![](../assets/images/b8811b0d4cf4c569e339.png)
 
 创建型模式，共五种：工厂方法模式、抽象工厂模式、单例模式、建造者模式、原型模式。
 
@@ -521,7 +521,7 @@ public class Client {
 
 抽象工厂简单地说是工厂的工厂，抽象工厂可以创建具体工厂，由具体工厂来产生具体产品。
 
-![](https://img-blog.csdnimg.cn/20200411190743299.jpg)
+![](../assets/images/02448761de38ee40b9f4.png)
 
 ```java
 //汽车

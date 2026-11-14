@@ -77,9 +77,9 @@ Spring AOP就是基于动态代理的，如果要代理的对象，实现了某�
 
 （7）引入（Introduction）：添加额外的方法或者字段到被通知的类。Spring允许引入新的接口（以及对应的实现）到任何被代理的对象。例如，你可以使用一个引入来使bean实现 IsModified 接口，以便简化缓存机制。
 
-![](https://img-blog.csdnimg.cn/2020120700443256.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2E3NDUyMzM3MDA=,size_16,color_FFFFFF,t_70)
+![](../assets/images/ad38f89035d48dabf3a0.png)
 
-![](https://img-blog.csdnimg.cn/20201207001947787.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2E3NDUyMzM3MDA=,size_16,color_FFFFFF,t_70)
+![](../assets/images/df93e70d56698b670e4b.png)
 
 # Spring通知（Advice）有哪些类型
 
@@ -93,7 +93,7 @@ Spring AOP就是基于动态代理的，如果要代理的对象，实现了某�
 
 （5）抛出异常后通知（AfterThrowing advice）：在方法抛出异常退出时执行的通知
 
-![](https://img-blog.csdnimg.cn/20201207005911882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2E3NDUyMzM3MDA=,size_16,color_FFFFFF,t_70)
+![](../assets/images/42dd9f64c08ed072765d.png)
 
 同一个Aspect，不同advice的执行顺序：
 
@@ -172,7 +172,7 @@ Spring AOP就是基于动态代理的，如果要代理的对象，实现了某�
 简单来说，Spring Bean的生命周期只有四个阶段：实例化 Instantiation --> 属性赋值 Populate  --> 初始化 Initialization  --> 销毁 Destruction
 
 
-![](https://img-blog.csdnimg.cn/img_convert/84341632e9df3625a91c3e2a1437ee65.png)
+![](../assets/images/434783221fc41b3d4954.png)
 
 （1）实例化Bean：
 
@@ -253,7 +253,7 @@ ThreadLocal和线程同步机制都是为了解决多线程中相同变量的访
 
 比如下图中A类依赖了B类，B类依赖了C类，而最后C类又依赖了A类，这样就形成了循环依赖问题。
 
-![](https://img-blog.csdnimg.cn/img_convert/7e0dff0f2f7c64f4ae88bb88a657eb93.png)
+![](../assets/images/fc1cd9c0f89d4df3372a.png)
 
 ## 循环依赖问题的类型
 
@@ -276,12 +276,12 @@ ThreadLocal和线程同步机制都是为了解决多线程中相同变量的访
 
 Spring解决的单例模式下的setter方法依赖注入引起的循环依赖问题，主要是通过两个缓存来解决的
 
-![](https://img-blog.csdnimg.cn/img_convert/d6f63135eed5564efe166c7b472d8fab.png)
+![](../assets/images/fa4ae88356b6201b48d1.png)
 
 ## Spring三大缓存介绍
 Spring中有三个缓存，用于存储单例的Bean实例，这三个缓存是彼此互斥的，不会针对同一个Bean的实例同时存储。如果调用getBean，则需要从三个缓存中依次获取指定的Bean实例。 读取顺序依次是一级缓存 ==> 二级缓存 ==> 三级缓存。
 
-![](https://img-blog.csdnimg.cn/img_convert/d9f570aa0dce404d7da35ecf42e9ddb5.png)
+![](../assets/images/54bd4ee9dc8c4a1b550e.png)
 
 1、一级缓存：Map<String, Object> singletonObjects：
 
@@ -323,17 +323,17 @@ K：bean的名称
 
 V：ObjectFactory，该对象持有提前暴露的bean的引用
 
-![](https://img-blog.csdnimg.cn/img_convert/449a13de9e3f9e05cd888ac5b27f1ad0.png)
+![](../assets/images/b6daf4d34c7b9ed82841.png)
 
 （3）为什么第三级缓存要使用ObjectFactory？
 
 如果仅仅是解决循环依赖问题，使用二级缓存就可以了，但是如果对象实现了AOP，那么注入到其他bean的时候，并不是最终的代理对象，而是原始的。这时就需要通过三级缓存的ObjectFactory才能提前产生最终的需要代理的对象。
 
-![](https://img-blog.csdnimg.cn/img_convert/5e0670114b787860bd190fab3ad91629.png)
+![](../assets/images/577084c9808c71d66c1b.png)
 
 （4）什么时候将Bean的引用提前暴露给第三级缓存的ObjectFactory持有？时机就是在第一步实例化之后，第二步依赖注入之前，完成此操作。
 
-![](https://img-blog.csdnimg.cn/img_convert/ccbd43c654f7bb2cc592082321566ea3.png)
+![](../assets/images/c96786154ba2708be5f4.png)
 
 ## 解决构造函数相互注入造成的循环依赖
 

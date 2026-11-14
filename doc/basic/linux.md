@@ -66,11 +66,20 @@ Linux 中的打包文件一般是以.tar 结尾的，压缩的命令一般是以
 
 示例：在随意某个目录下`ls -l`
 
-![](images/Linux权限命令.png)
+```text
+$ ls -l
+-rwxrw-r-- 1 alice developers 1024 Jan  1 10:00 aaa.txt
+```
 
 第一列的内容的信息解释如下：
 
-![](images/Linux权限解读.png)
+```text
+- rwx rw- r--
+│  │   │   └─ 其他用户：读
+│  │   └───── 所属组：读、写
+│  └───────── 所有者：读、写、执行
+└──────────── 文件类型：- 表示普通文件
+```
 
 > 下面将详细讲解文件的类型、Linux 中权限以及文件有所有者、所在组、其它组具体是什么？
 
@@ -122,7 +131,11 @@ Linux 中的打包文件一般是以.tar 结尾的，压缩的命令一般是以
 
 **`chmod u=rwx,g=rw,o=r aaa.txt`** 或者 **`chmod 764 aaa.txt`**
 
-![](images/修改文件权限.png)
+```text
+$ chmod 764 aaa.txt
+$ ls -l aaa.txt
+-rwxrw-r-- 1 alice developers 1024 Jan  1 10:00 aaa.txt
+```
 
 **补充一个比较常用的东西:**
 
@@ -228,17 +241,17 @@ printf(...)
 
 下图中的计算机中运行着A、B、C三个进程，其中进程A执行着上述基础网络程序，一开始，这3个进程都被操作系统的工作队列所引用，处于运行状态，会分时执行。
 
-![](https://pic3.zhimg.com/80/v2-2f3b71710f1805669a780a2d634f0626_720w.jpg)
+![](../assets/images/3b1752a34ad50da65841.jpg)
 
 **等待队列**
 
 当进程A执行到创建socket的语句时，操作系统会创建一个由文件系统管理的socket对象（如下图）。这个socket对象包含了发送缓冲区、接收缓冲区、等待队列等成员。等待队列是个非常重要的结构，它指向所有需要等待该socket事件的进程。
 
-![](https://pic3.zhimg.com/80/v2-7ce207c92c9dd7085fb7b823e2aa5872_720w.jpg)
+![](../assets/images/d5e2b1f2b1552d59070e.jpg)
 
 当程序执行到recv时，操作系统会将进程A从工作队列移动到该socket的等待队列中（如下图）。由于工作队列只剩下了进程B和C，依据进程调度，cpu会轮流执行这两个进程的程序，不会执行进程A的程序。所以进程A被阻塞，不会往下执行代码，也不会占用cpu资源。
 
-![](https://pic1.zhimg.com/80/v2-1c7a96c8da16f123388e46f88772e6d8_720w.jpg)
+![](../assets/images/450e1a223167e03c151d.jpg)
 
 > ps：操作系统添加等待队列只是添加了对这个“等待中”进程的引用，以便在接收到数据时获取进程对象、将其唤醒，而非直接将进程管理纳入自己之下。上图为了方便说明，直接将进程挂到等待队列之下。
 
@@ -253,11 +266,11 @@ printf(...)
 
 如下图所示，进程在recv阻塞期间，计算机收到了对端传送的数据（步骤①）。数据经由网卡传送到内存（步骤②），然后网卡通过中断信号通知cpu有数据到达，cpu执行中断程序（步骤③）。此处的中断程序主要有两项功能，先将网络数据写入到对应socket的接收缓冲区里面（步骤④），再唤醒进程A（步骤⑤），重新将进程A放入工作队列中。
 
-![](https://pic4.zhimg.com/80/v2-696b131cae434f2a0b5ab4d6353864af_720w.jpg)
+![](../assets/images/aa5421e979b1ce20f39d.jpg)
 
 唤醒进程的过程如下图所示。
 
-![](https://pic3.zhimg.com/80/v2-3e1d0a82cdc86f03343994f48d938922_720w.jpg)
+![](../assets/images/00977b039ba0c61a7663.jpg)
 
 **以上是内核接收数据全过程**
 
@@ -298,17 +311,17 @@ while(1){
 
 select的实现思路很直接。假如程序同时监视如下图的sock1、sock2和sock3三个socket，那么在调用select之后，操作系统把进程A分别加入这三个socket的等待队列中。
 
-![](https://pic4.zhimg.com/80/v2-0cccb4976f8f2c2f8107f2b3a5bc46b3_720w.jpg)
+![](../assets/images/de6c95de1934fb717333.jpg)
 
 当任何一个socket收到数据后，中断程序将唤起进程。下图展示了sock2接收到了数据的处理流程。
 
 > ps：recv和select的中断回调可以设置成不同的内容。
 
-![](https://pic1.zhimg.com/80/v2-85dba5430f3c439e4647ea4d97ba54fc_720w.jpg)
+![](../assets/images/bf2dcb4ae764bf639343.jpg)
 
 所谓唤起进程，就是将进程从所有的等待队列中移除，加入到工作队列里面。如下图所示。
 
-![](https://pic4.zhimg.com/80/v2-a86b203b8d955466fff34211d965d9eb_720w.jpg)
+![](../assets/images/7062f7bed0eb9ac1e4e0.jpg)
 
 经由这些步骤，当进程A被唤醒后，它知道至少有一个socket接收了数据。程序只需遍历一遍socket列表，就可以得到就绪的socket。
 
@@ -334,7 +347,7 @@ epoll是在select出现N多年后才被发明的，是select和poll的增强版�
 
 select低效的原因之一是将“维护等待队列”和“阻塞进程”两个步骤合二为一。如下图所示，每次调用select都需要这两步操作，然而大多数应用场景中，需要监视的socket相对固定，并不需要每次都修改。epoll将这两个操作分开，先用epoll_ctl维护等待队列，再调用epoll_wait阻塞进程。显而易见的，效率就能得到提升。
 
-![](https://pic2.zhimg.com/80/v2-5ce040484bbe61df5b484730c4cf56cd_720w.jpg)
+![](../assets/images/45e9bb6c5f3f2f4583de.jpg)
 
 为方便理解后续的内容，我们先复习下epoll的用法。如下的代码中，先用epoll_create创建一个epoll对象epfd，再通过epoll_ctl将需要监视的socket添加到epfd中，最后调用epoll_wait等待数据。
 
@@ -360,7 +373,7 @@ while(1){
 
 select低效的另一个原因在于程序不知道哪些socket收到数据，只能一个个遍历。如果内核维护一个“就绪列表”，引用收到数据的socket，就能避免遍历。如下图所示，计算机共有三个socket，收到数据的sock2和sock3被rdlist（就绪列表）所引用。当进程被唤醒后，只要获取rdlist的内容，就能够知道哪些socket收到数据。
 
-![](https://pic4.zhimg.com/80/v2-5c552b74772d8dbc7287864999e32c4f_720w.jpg)
+![](../assets/images/a0b9333d264303f139c3.jpg)
 
 ### epoll的原理和流程
 
@@ -370,7 +383,7 @@ select低效的另一个原因在于程序不知道哪些socket收到数据，�
 
 如下图所示，当某个进程调用epoll_create方法时，内核会创建一个eventpoll对象（也就是程序中epfd所代表的对象）。eventpoll对象也是文件系统中的一员，和socket一样，它也会有等待队列。
 
-![](https://pic4.zhimg.com/80/v2-e3467895734a9d97f0af3c7bf875aaeb_720w.jpg)
+![](../assets/images/0f991655286866d9a058.jpg)
 
 创建一个代表该epoll的eventpoll对象是必须的，因为内核要维护“就绪列表”等数据，“就绪列表”可以作为eventpoll的成员。
 
@@ -378,7 +391,7 @@ select低效的另一个原因在于程序不知道哪些socket收到数据，�
 
 创建epoll对象后，可以用epoll_ctl添加或删除所要监听的socket。以添加socket为例，如下图，如果通过epoll_ctl添加sock1、sock2和sock3的监视，内核会将eventpoll添加到这三个socket的等待队列中。
 
-![](https://pic2.zhimg.com/80/v2-b49bb08a6a1b7159073b71c4d6591185_720w.jpg)
+![](../assets/images/c2348e0dcb0481e81e8b.jpg)
 
 当socket收到数据后，中断程序会操作eventpoll对象，而不是直接操作进程。
 
@@ -386,7 +399,7 @@ select低效的另一个原因在于程序不知道哪些socket收到数据，�
 
 当socket收到数据后，中断程序会给eventpoll的“就绪列表”添加socket引用。如下图展示的是sock2和sock3收到数据后，中断程序让rdlist引用这两个socket。
 
-![给就绪列表添加引用](https://pic1.zhimg.com/80/v2-18b89b221d5db3b5456ab6a0f6dc5784_720w.jpg)
+![给就绪列表添加引用](../assets/images/291e825b588a58ee2295.jpg)
 
 eventpoll对象相当于是socket和进程之间的中介，socket的数据接收并不直接影响进程，而是通过改变eventpoll的就绪列表来改变进程状态。
 
@@ -396,11 +409,11 @@ eventpoll对象相当于是socket和进程之间的中介，socket的数据接�
 
 假设计算机中正在运行进程A和进程B，在某时刻进程A运行到了epoll_wait语句。如下图所示，内核会将进程A放入eventpoll的等待队列中，阻塞进程。
 
-![](https://pic1.zhimg.com/80/v2-90632d0dc3ded7f91379b848ab53974c_720w.jpg)
+![](../assets/images/ae2146a9ca3e3cdbdf45.jpg)
 
 当socket接收到数据，中断程序一方面修改rdlist，另一方面唤醒eventpoll等待队列中的进程，进程A再次进入运行状态（如下图）。也因为rdlist的存在，进程A可以知道哪些socket发生了变化。
 
-![](https://pic4.zhimg.com/80/v2-40bd5825e27cf49b7fd9a59dfcbe4d6f_720w.jpg)
+![](../assets/images/022e42de1d7f6c45d099.jpg)
 
 ### epoll的实现细节
 
@@ -410,7 +423,7 @@ eventpoll对象相当于是socket和进程之间的中介，socket的数据接�
 
 如下图所示，eventpoll包含了lock、mtx、wq（等待队列）、rdlist等成员。rdlist和rbr是我们所关心的。
 
-![](https://pic4.zhimg.com/80/v2-e63254878f67751dcc07a25b93f974bb_720w.jpg)
+![](../assets/images/13d036ee7f4c4518eb14.jpg)
 
 **就绪列表的数据结构**
 

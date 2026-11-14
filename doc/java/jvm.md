@@ -1,7 +1,7 @@
 # JVM
 # jvm 内存模型划分
 
-![](https://img-blog.csdnimg.cn/2019040912492050.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3Jvbmd0YW91cA==,size_16,color_FFFFFF,t_70)
+![](../assets/images/a8d4a3c8bf600a332fca.png)
 
 ## **程序计数器(线程私有)：**
 
@@ -25,7 +25,7 @@ JDK 中有很多方法是使用 Native 修饰的。Native 方法不是以 Java �
 
 栈帧是栈的元素。每个方法在执行时都会创建一个栈帧。栈帧中存储了局部变量表、操作数栈、动态连接和方法出口等信息。每个方法从调用到运行结束的过程，就对应着一个栈帧在栈中压栈到出栈的过程。
 
-![](https://img-blog.csdnimg.cn/20190409182042686.png)
+![](../assets/images/fa068ccb060986922362.png)
 
 ### 局部变量表
 
@@ -64,7 +64,7 @@ Java堆分为年轻代（Young Generation）和老年代（Old Generation）；�
 **方法区（线程共享）**
 方法区同 Java 堆一样是被所有线程共享的区间，用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码。更具体的说，静态变量+常量+类信息（版本、方法、字段等）+运行时常量池存在方法区中。常量池是方法区的一部分。
 
-![](https://img-blog.csdnimg.cn/20190410205726197.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3Jvbmd0YW91cA==,size_16,color_FFFFFF,t_70)
+![](../assets/images/3ed07ee69c423fb7b0b9.png)
 
 注：JDK1.8 使用元空间 MetaSpace 替代方法区，元空间并不在 JVM中，而是使用本地内存。元空间两个参数：
 
@@ -73,7 +73,7 @@ Java堆分为年轻代（Young Generation）和老年代（Old Generation）；�
 
 常量池中存储编译器生成的各种字面量和符号引用。字面量就是Java中常量的意思。比如文本字符串，final修饰的常量等。方法引用则包括类和接口的全限定名，方法名和描述符，字段名和描述符等。
 
-![](https://img-blog.csdnimg.cn/20190410210752310.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3Jvbmd0YW91cA==,size_16,color_FFFFFF,t_70)
+![](../assets/images/fb6b47a6c0dcb957c19e.png)
 
 优点：常量池避免了频繁的创建和销毁对象而影响系统性能，其实现了对象的共享。(Integer 常量池（缓存池），和字符串常量池)
 

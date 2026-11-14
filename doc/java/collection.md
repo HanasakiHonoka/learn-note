@@ -175,7 +175,7 @@ jdk1.8版本的ConcurrentHashMap支持并发扩容，transfer方法是真正进�
 
 `TreeMap` 和`HashMap` 都继承自`AbstractMap` ，但是需要注意的是`TreeMap`它还实现了`NavigableMap`接口和`SortedMap` 接口。
 
-![](https://snailclimb.gitee.io/javaguide/docs/java/collection/images/TreeMap%E7%BB%A7%E6%89%BF%E7%BB%93%E6%9E%84.png)
+![](./images/TreeMap继承结构.png)
 
 实现 `NavigableMap` 接口让 `TreeMap` 有了对集合内元素的搜索的能力。
 
@@ -323,12 +323,12 @@ static int hash(int h) {
 
 所谓 **“拉链法”** 就是：将链表和数组相结合。也就是说创建一个链表数组，数组中每一格就是一个链表。若遇到哈希冲突，则将冲突的值加到链表中即可。
 
-![](https://snailclimb.gitee.io/javaguide/docs/java/collection/images/jdk1.8%E4%B9%8B%E5%89%8D%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-HashMap.png)
+![](./images/jdk1.8之前的内部结构-HashMap.png)
 
 ### 1.8
 相比于之前的版本， JDK1.8 之后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树）时，将链表转化为红黑树，以减少搜索时间。
 
-![](https://snailclimb.gitee.io/javaguide/docs/java/collection/images/jdk1.8%E4%B9%8B%E5%90%8E%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-HashMap.png)
+![](./images/jdk1.8之后的内部结构-HashMap.png)
 
 > TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。红黑树就是为了解决二叉查找树的缺陷，因为二叉查找树在某些情况下会退化成一个线性结构。
 
@@ -381,7 +381,7 @@ AVL树是带有平衡条件的二叉查找树，一般是用平衡因子差值�
 
 （2）性质
 
-![](https://img-blog.csdn.net/20180710095739968?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTA4OTk5ODU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![](../assets/images/c48f5eea0431343ac582.png)
 
 如图1所示，每个节点非红即黑;
 
@@ -635,14 +635,14 @@ final long sumCount() {
 `addCount() `代码如下：
 
 如果 counterCells == null, 则对 baseCount 做 CAS 自增操作。
-![](https://pic4.zhimg.com/80/v2-8538ebf3422a0e6f6c6adf61a82d95db_720w.jpg)
+![](../assets/images/cde8947eb046bd97401f.jpg)
 
 如果并发导致 baseCount CAS 失败了使用 counterCells。
-![](https://pic2.zhimg.com/80/v2-8bf123dc5e4bc4f64416a87b0707fcd5_720w.jpg)
+![](../assets/images/92a10aa8dd0f384917cf.jpg)
 
 如果counterCells CAS 失败了，在 fullAddCount 方法中，会继续死循环操作，直到成功。
 
-![](https://pic1.zhimg.com/80/v2-cd7b6bcf019454f427a7d4dc13bde5c0_720w.jpg)
+![](../assets/images/560c6520bb5d0be861ac.jpg)
 
 然后，CounterCell 这个类到底是什么？我们会发现它使用了 @sun.misc.Contended 标记的类，内部包含一个 volatile 变量。@sun.misc.Contended 这个注解标识着这个类防止需要防止 "伪共享"。那么，什么又是伪共享呢？
 
