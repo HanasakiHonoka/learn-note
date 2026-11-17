@@ -4,6 +4,7 @@
   * [操作系统](basic/os)
   * [计算机网络](basic/network)
   * [数据库](basic/db)
+  * [数据库常见面试题](basic/dbInterview.md)
   * [SQL 语法与面试题](basic/sql.md)
   * [Linux](basic/linux.md)
 * [**JAVA**](java/)
