@@ -18,10 +18,29 @@
       repo: 'https://github.com/HanasakiHonoka/learn-note',
       auto2top: true,
 	    loadSidebar: true,
+      // Mermaid 在浏览器内渲染；加载失败时保留原始代码块。
+    plugins: [function (hook) {
+      hook.doneEach(function () {
+        if (!window.mermaid) return;
+        var blocks = document.querySelectorAll('pre[data-lang="mermaid"]');
+        blocks.forEach(function (block) {
+          var code = block.querySelector('code');
+          if (!code) return;
+          var diagram = document.createElement('div');
+          diagram.className = 'mermaid';
+          diagram.textContent = code.textContent;
+          block.parentNode.replaceChild(diagram, block);
+        });
+        window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+      });
+    }],
       subMaxLevel: 3
 
     }
   </script>
+  <!-- 固定版本以避免渲染接口变更；离线时仍显示 Mermaid 源码 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+  <script>if (window.mermaid) window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });</script>
   <!-- Docsify v4 -->
 
   <!-- <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script> -->
