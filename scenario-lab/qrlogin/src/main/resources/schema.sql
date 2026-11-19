@@ -1,0 +1,3 @@
+DROP ALL OBJECTS;
+
+CREATE TABLE scene(id VARCHAR(80) PRIMARY KEY, secret_hash VARCHAR(64), state VARCHAR(20), user_id BIGINT, expires_at BIGINT);

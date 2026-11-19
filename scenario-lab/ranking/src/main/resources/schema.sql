@@ -1,0 +1,7 @@
+DROP ALL OBJECTS;
+
+CREATE TABLE score_event(id VARCHAR(80) PRIMARY KEY, user_id BIGINT, delta BIGINT);
+CREATE TABLE score(user_id BIGINT PRIMARY KEY, points BIGINT, version BIGINT);
+CREATE TABLE rank_view(user_id BIGINT PRIMARY KEY, points BIGINT, version BIGINT);
+INSERT INTO score VALUES(1,0,0);
+INSERT INTO rank_view VALUES(1,0,0);

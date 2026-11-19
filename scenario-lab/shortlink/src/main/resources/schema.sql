@@ -1,0 +1,3 @@
+DROP ALL OBJECTS;
+
+CREATE TABLE short_link(code VARCHAR(40) PRIMARY KEY, target VARCHAR(2048), expires_at BIGINT);

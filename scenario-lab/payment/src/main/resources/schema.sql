@@ -1,0 +1,7 @@
+DROP ALL OBJECTS;
+
+CREATE TABLE payment(id BIGINT PRIMARY KEY, amount BIGINT, refunded BIGINT DEFAULT 0, state VARCHAR(20));
+CREATE TABLE ledger(payment_id BIGINT PRIMARY KEY, amount BIGINT);
+CREATE TABLE outbox(payment_id BIGINT PRIMARY KEY, sent BOOLEAN DEFAULT FALSE);
+CREATE TABLE refund(request_id VARCHAR(80) PRIMARY KEY, payment_id BIGINT, amount BIGINT);
+INSERT INTO payment(id,amount,state) VALUES(1,100,'PROCESSING');
