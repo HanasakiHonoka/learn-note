@@ -14,6 +14,7 @@
   * [JVM](java/jvm)
   * [多线程](java/multiThread)
   * [设计模式](java/designModel)
+  * [DDD 领域模型设计](java/DDD领域模型设计.md)
   * [场景设计面试](java/场景设计面试.md)
   * [其他](java/other)
 * [**框架**](framework/)
